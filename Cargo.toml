@@ -1,6 +1,6 @@
 [workspace]
 members = [
-  "caesar_cli",
+  "caesar_cli", "caesar_core", "caesar_server",
 ]
 
 [workspace.dependencies]
