@@ -1,6 +1,15 @@
-[workspace]
-members = [
-  "caesar_cli", "caesar_core", "caesar_server",
-]
+[package]
+name = "caesar"
+version = "0.0.1"
+edition = "2021"
+authors = ["Manuel Keidel", "Patryk Hegenberg", "Krzysztof Stankiewicz"]
 
-[workspace.dependencies]
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { version = "4.5.4", features = ["derive"] }
+# reqwest = { version = "0.12.3", features = ["blocking", "json"] }
+hyper = { version = "1", features = ["full"] }
+tokio = { version = "1", features = ["full"] }
+# http-body-util = "0.1"
+# hyper-util = { version = "0.1", features = ["full"] }
