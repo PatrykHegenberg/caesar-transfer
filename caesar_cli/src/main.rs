@@ -1,41 +1,13 @@
+mod cli;
 use reqwest::blocking::Client;
 use reqwest::StatusCode;
 use std::collections::HashMap;
 
-use clap::{Parser, Subcommand};
-
-#[derive(Parser)]
-#[command(version, about, long_about = None)]
-struct Cli {
-    /// Sets a custom config file
-    #[arg(short, long, value_name = "FILE")]
-    config: Option<String>,
-
-    /// Turn debugging information on
-    #[arg(short, long, action = clap::ArgAction::Count)]
-    debug: u8,
-
-    /// Name of Transfer to download files
-    #[arg(short, long, value_name = "Transfer_Name")]
-    name: Option<String>,
-
-    #[command(subcommand)]
-    command: Option<Commands>,
-}
-
-#[derive(Subcommand)]
-enum Commands {
-    /// Files to Send
-    Send {
-        /// Path to file(s)
-        #[arg(short, long, value_name = "FILE")]
-        file: Option<String>,
-    },
-}
+pub use crate::cli::*;
 
 fn main() {
     let client = Client::new();
-    let cli = Cli::parse();
+    let cli = cli::Cli::new();
     if let Some(config_path) = cli.config.as_deref() {
         println!("Value for config: {}", config_path);
     }
@@ -82,10 +54,7 @@ fn main() {
                 let json: HashMap<String, String> =
                     res.json().expect("Error parsing JSON response");
                 println!("Json Response: {:?}", json);
-            } else {
-                println!("Error: Failed to send request");
             }
         }
     }
 }
-
