@@ -1,7 +1,7 @@
 use crate::receiver;
 use crate::sender;
 use clap::{Parser, Subcommand};
-use reqwest::blocking::Client;
+// use reqwest::blocking::Client;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -62,10 +62,14 @@ impl Args {
     pub fn new() -> Self {
         Self::parse()
     }
-    pub fn run(&self, client: Client) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn run(
+        &self,
+        // client: Client,
+    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         match &self.command {
             Some(Commands::Send { relay, file }) => {
-                sender::send_info(client, file.as_deref().unwrap_or("test.txt"))?;
+                println!("Stuff");
+                sender::send_info(file.as_deref().unwrap_or("test.txt")).await?;
             }
             Some(Commands::Receive {
                 relay,
@@ -73,7 +77,7 @@ impl Args {
                 name,
             }) => {
                 let transfer_name = name.as_deref().unwrap_or("None");
-                receiver::download_info(client, transfer_name)?
+                receiver::download_info(transfer_name).await?
             }
             Some(Commands::Serve { port }) => {}
             Some(Commands::Config {

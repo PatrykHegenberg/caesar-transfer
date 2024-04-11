@@ -1,23 +1,21 @@
-use reqwest::{blocking::Client, StatusCode};
+use crate::http_client;
 use std::collections::HashMap;
 
-type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
-pub fn send_info(client: Client, file: &str) -> Result<()> {
+pub async fn send_info(file: &str) -> Result<()> {
     let mut map = HashMap::new();
     map.insert("keyword", "test");
     map.insert("files", file);
 
-    let res = client
-        .post("http://192.168.178.43:1323/upload")
-        .json(&map)
-        .send()?;
+    let json_data = serde_json::to_string(&map)?;
 
-    if res.status() == StatusCode::OK {
-        let json: HashMap<String, String> = res.json()?;
-        println!("JSON Response: {:?}", json);
-    } else {
-        println!("Error: Faile to send request");
-    }
+    http_client::send_request(
+        "http://192.168.178.43:1323/upload".trim(),
+        "POST",
+        Some(json_data),
+    )
+    .await?;
+
     Ok(())
 }
