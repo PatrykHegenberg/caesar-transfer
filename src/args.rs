@@ -1,3 +1,4 @@
+use crate::http_server;
 use crate::receiver;
 use crate::sender;
 use clap::{Parser, Subcommand};
@@ -79,7 +80,9 @@ impl Args {
                 let transfer_name = name.as_deref().unwrap_or("None");
                 receiver::download_info(transfer_name).await?
             }
-            Some(Commands::Serve { port }) => {}
+            Some(Commands::Serve { port }) => {
+                http_server::start_server().await;
+            }
             Some(Commands::Config {
                 path,
                 show,
