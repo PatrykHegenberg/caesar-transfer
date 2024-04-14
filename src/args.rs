@@ -69,7 +69,6 @@ impl Args {
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         match &self.command {
             Some(Commands::Send { relay, file }) => {
-                println!("Stuff");
                 sender::send_info(file.as_deref().unwrap_or("test.txt")).await?;
             }
             Some(Commands::Receive {
