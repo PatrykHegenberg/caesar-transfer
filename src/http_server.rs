@@ -5,7 +5,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use axum_client_ip::{InsecureClientIp, SecureClientIp, SecureClientIpSource};
+use axum_client_ip::{SecureClientIpSource};
 use log::info;
 use rand::{seq::SliceRandom, thread_rng};
 use serde::{Deserialize, Serialize};

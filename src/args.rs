@@ -59,6 +59,12 @@ pub enum Commands {
     },
 }
 
+impl Default for Args {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Args {
     pub fn new() -> Self {
         Self::parse()
@@ -68,25 +74,25 @@ impl Args {
         // client: Client,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         match &self.command {
-            Some(Commands::Send { relay, file }) => {
+            Some(Commands::Send { relay: _, file }) => {
                 sender::send_info(file.as_deref().unwrap_or("test.txt")).await?;
             }
             Some(Commands::Receive {
-                relay,
-                overwrite,
+                relay: _,
+                overwrite: _,
                 name,
             }) => {
                 let transfer_name = name.as_deref().unwrap_or("None");
                 receiver::download_info(transfer_name).await?
             }
-            Some(Commands::Serve { port }) => {
+            Some(Commands::Serve { port: _ }) => {
                 http_server::start_server().await;
             }
             Some(Commands::Config {
-                path,
-                show,
-                edit,
-                reset,
+                path: _,
+                show: _,
+                edit: _,
+                reset: _,
             }) => {}
             None => {}
         }
