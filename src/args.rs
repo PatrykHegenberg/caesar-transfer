@@ -2,7 +2,6 @@ use crate::http_server;
 use crate::receiver;
 use crate::sender;
 use clap::{Parser, Subcommand};
-// use reqwest::blocking::Client;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -16,7 +15,7 @@ pub enum Commands {
     Send {
         /// Address of the relay server. Accepted formats are: 127.0.0.1:8080, [::1]:8080, example.com
         #[arg(short, long)]
-        relay: bool,
+        relay: Option<String>,
         /// Path to file(s)
         #[arg(short, long, value_name = "FILE")]
         file: Option<String>,
@@ -25,7 +24,7 @@ pub enum Commands {
     Receive {
         /// Address of the relay server. Accepted formats are: 127.0.0.1:8080, [::1]:8080, example.com
         #[arg(short, long)]
-        relay: bool,
+        relay: Option<String>,
 
         /// Overwrite existing Files
         #[arg(short, long)]
@@ -38,7 +37,7 @@ pub enum Commands {
     Serve {
         /// Port to run the relay server on
         #[arg(short, long)]
-        port: bool,
+        port: i32,
     },
     Config {
         /// Show path to config file
