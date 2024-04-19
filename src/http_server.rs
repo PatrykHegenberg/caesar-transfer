@@ -1,3 +1,4 @@
+use crate::transfer_info::transfer_info::{TransferInfoBody, TransferInfoRequest};
 use axum::{
     extract::{connect_info::ConnectInfo, Json, Path, State},
     http::StatusCode,
@@ -7,7 +8,6 @@ use axum::{
 };
 use axum_client_ip::SecureClientIpSource;
 use rand::{seq::SliceRandom, thread_rng};
-use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::{
     env,
@@ -15,37 +15,11 @@ use std::{
     sync::{Arc, Mutex},
 };
 use tokio::signal;
-use tracing::{debug, error, info, trace, warn};
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct TransferRequest {
-    pub ip: String,
-    pub name: String,
-    pub body: TransferBody,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct TransferBody {
-    pub keyword: String,
-    pub files: String,
-}
-
-impl TransferRequest {
-    pub fn new() -> Self {
-        Self {
-            ip: "".to_string(),
-            name: "".to_string(),
-            body: TransferBody {
-                keyword: "".to_string(),
-                files: "".to_string(),
-            },
-        }
-    }
-}
+use tracing::{debug, info, warn};
 
 #[derive(Debug, Clone)]
 struct AppState {
-    data: Arc<Mutex<Vec<TransferRequest>>>,
+    data: Arc<Mutex<Vec<TransferInfoRequest>>>,
 }
 
 pub async fn start_server(port: Option<&i32>, listen_addr: Option<&String>) {
@@ -110,7 +84,7 @@ async fn download_info(
         }
         None => {
             warn!("couldn't find transfer-name: {}", name);
-            (StatusCode::NOT_FOUND, Json(TransferRequest::new()))
+            (StatusCode::NOT_FOUND, Json(TransferInfoRequest::new()))
         }
     }
 }
@@ -118,14 +92,14 @@ async fn download_info(
 async fn upload_info(
     State(shared_state): State<AppState>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
-    Json(payload): Json<TransferBody>,
+    Json(payload): Json<TransferInfoBody>,
 ) -> impl IntoResponse {
     debug!("Got upload request from {}", addr.ip().to_string());
     let mut data = shared_state.data.lock().unwrap();
-    let t_request = TransferRequest {
+    let t_request = TransferInfoRequest {
         ip: addr.ip().to_string(),
         name: generate_random_name(),
-        body: TransferBody {
+        body: TransferInfoBody {
             keyword: payload.keyword,
             files: payload.files,
         },

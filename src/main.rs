@@ -1,16 +1,20 @@
-pub mod args;
-pub mod http_client;
-pub mod http_server;
-pub mod receiver;
-pub mod sender;
+mod cli;
+mod http_client;
+mod http_server;
+mod receiver;
+mod sender;
+mod transfer_info;
+use crate::cli::args::Args;
 use dotenv::dotenv;
+use tracing::error;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     dotenv().ok();
-    let args = args::Args::new();
+    env_logger::init();
+    let args = Args::new();
     if let Err(e) = args.run().await {
-        eprintln!("Error {e}");
+        error!("{e}");
     }
     Ok(())
 }

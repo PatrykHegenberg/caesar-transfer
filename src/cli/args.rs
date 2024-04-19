@@ -1,6 +1,6 @@
 use crate::http_server;
-use crate::receiver;
-use crate::sender;
+use crate::receiver::receiver;
+use crate::sender::sender;
 use clap::{Parser, Subcommand};
 use log::debug;
 
@@ -33,7 +33,7 @@ pub enum Commands {
         overwrite: bool,
 
         /// Name of Transfer to download files
-        #[arg(short, long, value_name = "Transfer_Name")]
+        #[arg(value_name = "Transfer_Name")]
         name: Option<String>,
     },
     /// Start a relay server
@@ -76,23 +76,25 @@ impl Args {
         Self::parse()
     }
     pub async fn run(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        env_logger::init();
-        debug!("args: {:?}", self);
+        debug!("args: {:#?}", self);
         match &self.command {
             Some(Commands::Send { relay, file }) => {
                 sender::send_info(
-                    relay.as_deref().unwrap_or("http://192.168.178.43:1323"),
+                    relay.as_deref().unwrap_or("http://0.0.0.0:1323"),
                     file.as_deref().unwrap_or("test.txt"),
                 )
                 .await?;
             }
             Some(Commands::Receive {
-                relay: _,
+                relay,
                 overwrite: _,
                 name,
             }) => {
-                let transfer_name = name.as_deref().unwrap_or("None");
-                receiver::download_info(transfer_name).await?
+                receiver::download_info(
+                    relay.as_deref().unwrap_or("http://0.0.0.0:1323"),
+                    name.as_deref().unwrap_or("None"),
+                )
+                .await?
             }
             Some(Commands::Serve {
                 port,

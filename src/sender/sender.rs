@@ -1,4 +1,4 @@
-use crate::http_server::TransferRequest;
+use crate::transfer_info::transfer_info::TransferInfoRequest;
 use log::{debug, error};
 use reqwest::{Client, StatusCode};
 use std::collections::HashMap;
@@ -18,7 +18,7 @@ pub async fn send_info(relay: &str, file: &str) -> Result<()> {
         .send()
         .await?;
     if res.status() == StatusCode::CREATED {
-        let transfer_info: TransferRequest = res.json().await?;
+        let transfer_info: TransferInfoRequest = res.json().await?;
         debug!("Json Response: {:#?}", transfer_info);
         println!("Transfer name: {}", transfer_info.name);
     } else {
