@@ -1,7 +1,7 @@
 mod cli;
 mod http_client;
-mod http_server;
 mod receiver;
+mod relay;
 mod sender;
 mod transfer_info;
 use crate::cli::args::Args;

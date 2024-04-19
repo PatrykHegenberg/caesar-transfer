@@ -1,6 +1,8 @@
-use crate::http_server;
-use crate::receiver::receiver;
-use crate::sender::sender;
+use crate::relay::server;
+use crate::{
+    receiver::receiver,
+    sender::{sender, server::serf_file},
+};
 use clap::{Parser, Subcommand};
 use log::debug;
 
@@ -84,6 +86,7 @@ impl Args {
                     file.as_deref().unwrap_or("test.txt"),
                 )
                 .await?;
+                serf_file(file.as_ref().unwrap()).await;
             }
             Some(Commands::Receive {
                 relay,
@@ -100,7 +103,7 @@ impl Args {
                 port,
                 listen_address,
             }) => {
-                http_server::start_server(port.as_ref(), listen_address.as_ref()).await;
+                server::start_server(port.as_ref(), listen_address.as_ref()).await;
             }
             Some(Commands::Config {
                 path: _,
