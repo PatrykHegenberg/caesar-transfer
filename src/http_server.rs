@@ -5,8 +5,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use axum_client_ip::{SecureClientIpSource};
-use log::info;
+use axum_client_ip::SecureClientIpSource;
 use rand::{seq::SliceRandom, thread_rng};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -16,6 +15,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 use tokio::signal;
+use tracing::{debug, error, info, trace, warn};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct TransferRequest {
@@ -30,33 +30,52 @@ struct TransferBody {
     files: String,
 }
 
+impl TransferRequest {
+    fn new() -> Self {
+        Self {
+            ip: "".to_string(),
+            name: "".to_string(),
+            body: TransferBody {
+                keyword: "".to_string(),
+                files: "".to_string(),
+            },
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 struct AppState {
     data: Arc<Mutex<Vec<TransferRequest>>>,
 }
 
-pub async fn start_server() {
+pub async fn start_server(port: Option<&i32>, listen_addr: Option<&String>) {
     env_logger::init();
     info!("Server starting...");
     let shared_state = AppState {
         data: Arc::new(Mutex::new(Vec::new())),
     };
-    let app_environemtn = env::var("APP_ENVIRONMENT").unwrap_or("development".to_string());
-    let app_host = env::var("APP_HOST").unwrap_or("0.0.0.0".to_string());
-    let app_port = env::var("APP_PORT").unwrap_or("1323".to_string());
+    let app_environemt = env::var("APP_ENVIRONMENT").unwrap_or("development".to_string());
+    let app_host = match listen_addr {
+        Some(address) => address.to_string(),
+        None => env::var("APP_HOST").unwrap_or("0.0.0.0".to_string()),
+    };
+    let app_port = match port {
+        Some(port) => port.to_string(),
+        None => env::var("APP_PORT").unwrap_or("1323".to_string()),
+    };
 
-    info!("Server configured to accept connections on host {app_host}...");
-    info!("Server configured to listen connections on port {app_port}...");
+    debug!("Server configured to accept connections on host {app_host}...");
+    debug!("Server configured to listen connections on port {app_port}...");
 
-    match app_environemtn.as_str() {
+    match app_environemt.as_str() {
         "development" => {
-            info!("Running in development mode");
+            debug!("Running in development mode");
         }
         "production" => {
-            info!("Running in production mode");
+            debug!("Running in production mode");
         }
         _ => {
-            info!("Running in development mode");
+            debug!("Running in development mode");
         }
     }
     let app = Router::new()
@@ -82,26 +101,16 @@ async fn download_info(
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
     Path(name): Path<String>,
 ) -> impl IntoResponse {
-    info!("Get new download request from: {}", addr.ip().to_string());
+    debug!("Get new download request from: {}", addr.ip().to_string());
     let data = shared_state.data.lock().unwrap();
     match data.iter().find(|request| request.name == name) {
         Some(request) => {
-            info!("Found transfer name.");
+            debug!("Found transfer name.");
             (StatusCode::OK, Json(request.clone()))
         }
         None => {
-            info!("couldn't find transfer-name: {}", name);
-            (
-                StatusCode::NOT_FOUND,
-                Json(TransferRequest {
-                    name: "".to_string(),
-                    ip: "".to_string(),
-                    body: TransferBody {
-                        keyword: "".to_string(),
-                        files: "".to_string(),
-                    },
-                }),
-            )
+            warn!("couldn't find transfer-name: {}", name);
+            (StatusCode::NOT_FOUND, Json(TransferRequest::new()))
         }
     }
 }
@@ -111,7 +120,7 @@ async fn upload_info(
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
     Json(payload): Json<TransferBody>,
 ) -> impl IntoResponse {
-    info!("Got upload request from {}", addr.ip().to_string());
+    debug!("Got upload request from {}", addr.ip().to_string());
     let mut data = shared_state.data.lock().unwrap();
     let t_request = TransferRequest {
         ip: addr.ip().to_string(),
@@ -123,8 +132,8 @@ async fn upload_info(
     };
     data.push(t_request.clone());
 
-    info!("New TransferRequest created");
-    info!("Actual AppState is {:#?}", *data);
+    debug!("New TransferRequest created");
+    debug!("Actual AppState is {:#?}", *data);
 
     (StatusCode::CREATED, Json(t_request))
 }

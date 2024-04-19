@@ -12,6 +12,7 @@ pub struct Args {
 
 #[derive(Subcommand)]
 pub enum Commands {
+    /// Send files to the receiver or relay server
     Send {
         /// Address of the relay server. Accepted formats are: 127.0.0.1:8080, [::1]:8080, example.com
         #[arg(short, long)]
@@ -34,11 +35,16 @@ pub enum Commands {
         #[arg(short, long, value_name = "Transfer_Name")]
         name: Option<String>,
     },
+    /// Start a relay server
     Serve {
         /// Port to run the relay server on
         #[arg(short, long)]
-        port: i32,
+        port: Option<i32>,
+        /// The Listen address to run the relay server on
+        #[arg(short, long)]
+        listen_address: Option<String>,
     },
+    /// Work with your configuration
     Config {
         /// Show path to config file
         #[arg(short, long)]
@@ -68,10 +74,7 @@ impl Args {
     pub fn new() -> Self {
         Self::parse()
     }
-    pub async fn run(
-        &self,
-        // client: Client,
-    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    pub async fn run(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         match &self.command {
             Some(Commands::Send { relay: _, file }) => {
                 sender::send_info(file.as_deref().unwrap_or("test.txt")).await?;
@@ -84,8 +87,11 @@ impl Args {
                 let transfer_name = name.as_deref().unwrap_or("None");
                 receiver::download_info(transfer_name).await?
             }
-            Some(Commands::Serve { port: _ }) => {
-                http_server::start_server().await;
+            Some(Commands::Serve {
+                port,
+                listen_address,
+            }) => {
+                http_server::start_server(port.as_ref(), listen_address.as_ref()).await;
             }
             Some(Commands::Config {
                 path: _,
