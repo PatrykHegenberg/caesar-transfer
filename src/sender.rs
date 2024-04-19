@@ -1,35 +1,29 @@
-// use crate::http_client;
+use crate::http_server::TransferRequest;
+use log::{debug, error};
 use reqwest::{Client, StatusCode};
-use serde_json::Value;
 use std::collections::HashMap;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
-pub async fn send_info(file: &str) -> Result<()> {
+pub async fn send_info(relay: &str, file: &str) -> Result<()> {
+    debug!("Send Request to: {:?}", relay.to_string());
     let mut map = HashMap::new();
     map.insert("keyword", "test");
     map.insert("files", file);
 
-    // let json_data = serde_json::to_string(&map)?;
-
     let client = Client::new();
     let res = client
-        .post("http://192.168.178.43:1323/upload")
+        .post(relay.to_string() + "/upload")
         .json(&map)
         .send()
         .await?;
     if res.status() == StatusCode::CREATED {
-        let json: Value = res.json().await?;
-        println!("Json Response: {:#?}", json);
+        let transfer_info: TransferRequest = res.json().await?;
+        debug!("Json Response: {:#?}", transfer_info);
+        println!("Transfer name: {}", transfer_info.name);
     } else {
-        println!("Error reading response");
+        error!("Error reading response");
     }
-    // http_client::send_request(
-    //     "http://192.168.178.43:1323/upload".trim(),
-    //     "POST",
-    //     Some(json_data),
-    // )
-    // .await?;
 
     Ok(())
 }

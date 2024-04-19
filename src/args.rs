@@ -2,15 +2,16 @@ use crate::http_server;
 use crate::receiver;
 use crate::sender;
 use clap::{Parser, Subcommand};
+use log::debug;
 
-#[derive(Parser)]
+#[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Args {
     #[command(subcommand)]
     pub command: Option<Commands>,
 }
 
-#[derive(Subcommand)]
+#[derive(Subcommand, Debug)]
 pub enum Commands {
     /// Send files to the receiver or relay server
     Send {
@@ -18,7 +19,7 @@ pub enum Commands {
         #[arg(short, long)]
         relay: Option<String>,
         /// Path to file(s)
-        #[arg(short, long, value_name = "FILE")]
+        #[arg(value_name = "FILE")]
         file: Option<String>,
     },
     /// Receives Files from the sender with the matching password
@@ -75,9 +76,15 @@ impl Args {
         Self::parse()
     }
     pub async fn run(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+        env_logger::init();
+        debug!("args: {:?}", self);
         match &self.command {
-            Some(Commands::Send { relay: _, file }) => {
-                sender::send_info(file.as_deref().unwrap_or("test.txt")).await?;
+            Some(Commands::Send { relay, file }) => {
+                sender::send_info(
+                    relay.as_deref().unwrap_or("http://192.168.178.43:1323"),
+                    file.as_deref().unwrap_or("test.txt"),
+                )
+                .await?;
             }
             Some(Commands::Receive {
                 relay: _,

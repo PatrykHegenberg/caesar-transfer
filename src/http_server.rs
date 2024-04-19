@@ -18,20 +18,20 @@ use tokio::signal;
 use tracing::{debug, error, info, trace, warn};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-struct TransferRequest {
-    ip: String,
-    name: String,
-    body: TransferBody,
+pub struct TransferRequest {
+    pub ip: String,
+    pub name: String,
+    pub body: TransferBody,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-struct TransferBody {
-    keyword: String,
-    files: String,
+pub struct TransferBody {
+    pub keyword: String,
+    pub files: String,
 }
 
 impl TransferRequest {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             ip: "".to_string(),
             name: "".to_string(),
@@ -49,7 +49,7 @@ struct AppState {
 }
 
 pub async fn start_server(port: Option<&i32>, listen_addr: Option<&String>) {
-    env_logger::init();
+    // env_logger::init();
     info!("Server starting...");
     let shared_state = AppState {
         data: Arc::new(Mutex::new(Vec::new())),
