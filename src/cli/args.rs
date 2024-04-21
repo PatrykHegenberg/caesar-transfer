@@ -1,10 +1,10 @@
 use crate::relay::server;
 use crate::{
-    receiver::receiver,
-    sender::{sender, server::serf_file},
+    receiver::client as receiver,
+    sender::{client as sender, server::serf_file},
 };
 use clap::{Parser, Subcommand};
-use log::debug;
+use tracing::{debug, error, info};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -81,23 +81,50 @@ impl Args {
         debug!("args: {:#?}", self);
         match &self.command {
             Some(Commands::Send { relay, file }) => {
-                sender::send_info(
+                let _ = match sender::send_info(
                     relay.as_deref().unwrap_or("http://0.0.0.0:1323"),
                     file.as_deref().unwrap_or("test.txt"),
                 )
-                .await?;
-                serf_file(file.as_ref().unwrap()).await;
+                .await
+                {
+                    Ok(name) => {
+                        println!("Transfer name: {}", name);
+                        serf_file(file.as_ref().unwrap()).await;
+                        Ok(())
+                    }
+                    Err(err) => Err(err),
+                };
             }
             Some(Commands::Receive {
                 relay,
-                overwrite: _,
+                overwrite,
                 name,
             }) => {
-                receiver::download_info(
+                let response = receiver::download_info(
                     relay.as_deref().unwrap_or("http://0.0.0.0:1323"),
                     name.as_deref().unwrap_or("None"),
                 )
-                .await?
+                .await;
+                match response {
+                    Ok(res) => {
+                        debug!("The response is: {:#?}", res);
+                        let reachable = receiver::ping_sender(&res.ip).await;
+                        match reachable {
+                            Ok(_) => match receiver::download_file(&res, overwrite).await {
+                                Ok(_) => {
+                                    info!("Download complete");
+                                    let _ = match receiver::signal_success(&res.ip).await {
+                                        Ok(_) => Ok(()),
+                                        Err(err) => Err(err),
+                                    };
+                                }
+                                Err(err) => error!(err),
+                            },
+                            Err(err) => error!("Error: {:#?}", err),
+                        }
+                    }
+                    Err(err) => error!("Error: {:#?}", err),
+                }
             }
             Some(Commands::Serve {
                 port,

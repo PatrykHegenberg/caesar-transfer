@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 pub struct TransferInfoRequest {
     pub ip: String,
     pub name: String,
+    pub message: String,
     pub body: TransferInfoBody,
 }
 
@@ -18,6 +19,7 @@ impl TransferInfoRequest {
         Self {
             ip: "".to_string(),
             name: "".to_string(),
+            message: "".to_string(),
             body: TransferInfoBody {
                 keyword: "".to_string(),
                 files: "".to_string(),

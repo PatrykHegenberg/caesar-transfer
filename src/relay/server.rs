@@ -84,7 +84,18 @@ async fn download_info(
         }
         None => {
             warn!("couldn't find transfer-name: {}", name);
-            (StatusCode::NOT_FOUND, Json(TransferInfoRequest::new()))
+            (
+                StatusCode::NOT_FOUND,
+                Json(TransferInfoRequest {
+                    ip: "".to_string(),
+                    name: "".to_string(),
+                    message: "error".to_string(),
+                    body: TransferInfoBody {
+                        keyword: "".to_string(),
+                        files: "".to_string(),
+                    },
+                }),
+            )
         }
     }
 }
@@ -99,6 +110,7 @@ async fn upload_info(
     let t_request = TransferInfoRequest {
         ip: addr.ip().to_string(),
         name: generate_random_name(),
+        message: "created".to_string(),
         body: TransferInfoBody {
             keyword: payload.keyword,
             files: payload.files,
