@@ -1,37 +1,11 @@
+use crate::error::TransferNotFoundError;
 use crate::transfer_info::transfer_info::TransferInfoRequest;
 use reqwest::Client;
-use std::error::Error;
-use std::fmt;
 use std::fs::File;
 use std::io::copy;
 use tracing::{debug, error, info};
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
-
-#[derive(Debug)]
-struct TransferNotFoundError {
-    message: String,
-}
-
-impl TransferNotFoundError {
-    fn new(msg: &str) -> Self {
-        Self {
-            message: msg.to_string(),
-        }
-    }
-}
-
-impl fmt::Display for TransferNotFoundError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.message)
-    }
-}
-
-impl Error for TransferNotFoundError {
-    fn description(&self) -> &str {
-        &self.message
-    }
-}
 
 pub async fn download_info(relay: &str, filename: &str) -> Result<TransferInfoRequest> {
     match reqwest::get(format!("{}/download/{}", relay.to_string(), filename)).await {

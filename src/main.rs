@@ -1,4 +1,5 @@
 mod cli;
+mod error;
 mod http_client;
 mod receiver;
 mod relay;

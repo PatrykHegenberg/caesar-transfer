@@ -82,7 +82,7 @@ impl Args {
         match &self.command {
             Some(Commands::Send { relay, file }) => {
                 let _ = match sender::send_info(
-                    relay.as_deref().unwrap_or("http://0.0.0.0:1323"),
+                    relay.as_deref().unwrap_or("http://0.0.0.0:8080"),
                     file.as_deref().unwrap_or("test.txt"),
                 )
                 .await
@@ -101,7 +101,7 @@ impl Args {
                 name,
             }) => {
                 let response = receiver::download_info(
-                    relay.as_deref().unwrap_or("http://0.0.0.0:1323"),
+                    relay.as_deref().unwrap_or("http://0.0.0.0:8080"),
                     name.as_deref().unwrap_or("None"),
                 )
                 .await;

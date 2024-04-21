@@ -1,42 +1,21 @@
+use crate::error::TransferNotCreatedError;
 use crate::transfer_info::transfer_info::TransferInfoRequest;
-use log::{debug, error};
+use local_ip_address;
 use reqwest::{Client, StatusCode};
 use std::collections::HashMap;
-use std::error::Error;
-use std::fmt;
+use tracing::{debug, error, info};
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
-#[derive(Debug)]
-struct TransferNotCreatedError {
-    message: String,
-}
-
-impl TransferNotCreatedError {
-    fn new(msg: &str) -> Self {
-        Self {
-            message: msg.to_string(),
-        }
-    }
-}
-
-impl fmt::Display for TransferNotCreatedError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.message)
-    }
-}
-
-impl Error for TransferNotCreatedError {
-    fn description(&self) -> &str {
-        &self.message
-    }
-}
-
 pub async fn send_info(relay: &str, file: &str) -> Result<String> {
+    let sender_ip = local_ip_address::local_ip().unwrap();
+    debug!("local ip is: {}", sender_ip);
+    let ip_str = sender_ip.to_owned().to_string();
     debug!("Send Request to: {:?}", relay.to_string());
     let mut map = HashMap::new();
     map.insert("keyword", "test");
     map.insert("files", file);
+    map.insert("ip", ip_str.as_str());
 
     let client = Client::new();
     let res = client

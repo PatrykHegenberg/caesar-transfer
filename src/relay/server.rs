@@ -23,7 +23,6 @@ struct AppState {
 }
 
 pub async fn start_server(port: Option<&i32>, listen_addr: Option<&String>) {
-    // env_logger::init();
     info!("Server starting...");
     let shared_state = AppState {
         data: Arc::new(Mutex::new(Vec::new())),
