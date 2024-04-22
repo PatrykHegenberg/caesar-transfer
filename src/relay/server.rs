@@ -7,7 +7,6 @@ use axum::{
     Router,
 };
 use axum_client_ip::SecureClientIpSource;
-use rand::{seq::SliceRandom, thread_rng};
 use serde_json::json;
 use std::{
     env,
@@ -76,7 +75,7 @@ async fn download_info(
 ) -> impl IntoResponse {
     debug!("Get new download request from: {}", addr.ip().to_string());
     let data = shared_state.data.lock().unwrap();
-    match data.iter().find(|request| request.name == name) {
+    match data.iter().find(|request| request.body.name == name) {
         Some(request) => {
             debug!("Found transfer name.");
             (StatusCode::OK, Json(request.clone()))
@@ -86,12 +85,12 @@ async fn download_info(
             (
                 StatusCode::NOT_FOUND,
                 Json(TransferInfoRequest {
-                    name: "".to_string(),
                     message: "error".to_string(),
                     body: TransferInfoBody {
                         keyword: "".to_string(),
                         files: "".to_string(),
                         ip: "".to_string(),
+                        name: "".to_string(),
                     },
                 }),
             )
@@ -107,12 +106,12 @@ async fn upload_info(
     debug!("Got upload request from {}", addr.ip().to_string());
     let mut data = shared_state.data.lock().unwrap();
     let t_request = TransferInfoRequest {
-        name: generate_random_name(),
         message: "created".to_string(),
         body: TransferInfoBody {
             keyword: payload.keyword,
             files: payload.files,
             ip: payload.ip,
+            name: payload.name,
         },
     };
     data.push(t_request.clone());
@@ -135,30 +134,6 @@ async fn status() -> impl IntoResponse {
     (StatusCode::OK, Json(response))
 }
 
-fn generate_random_name() -> String {
-    let mut rng = thread_rng();
-    let adjective = adjectives().choose(&mut rng).unwrap();
-    // let adjective = adjectives().sample(&mut rng).unwrap();
-    let noun1 = nouns1().choose(&mut rng).unwrap();
-    let noun2 = nouns2().choose(&mut rng).unwrap();
-
-    format!("{adjective}-{noun1}-{noun2}")
-}
-
-fn adjectives() -> &'static [&'static str] {
-    static ADJECTIVES: &[&str] = &["funny", "smart", "creative", "friendly", "great"];
-    ADJECTIVES
-}
-
-fn nouns1() -> &'static [&'static str] {
-    static NOUNS1: &[&str] = &["dog", "cat", "flower", "tree", "house"];
-    NOUNS1
-}
-
-fn nouns2() -> &'static [&'static str] {
-    static NOUNS2: &[&str] = &["cookie", "cake", "frosting"];
-    NOUNS2
-}
 async fn shutdown_signal() {
     let ctrl_c = async {
         signal::ctrl_c()

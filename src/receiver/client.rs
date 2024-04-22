@@ -1,14 +1,19 @@
 use crate::error::TransferNotFoundError;
 use crate::transfer_info::transfer_info::TransferInfoRequest;
+use hex;
 use reqwest::Client;
+use sha2::{Digest, Sha256};
 use std::fs::File;
 use std::io::copy;
 use tracing::{debug, error, info};
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
-pub async fn download_info(relay: &str, filename: &str) -> Result<TransferInfoRequest> {
-    match reqwest::get(format!("{}/download/{}", relay, filename)).await {
+pub async fn download_info(relay: &str, name: &str) -> Result<TransferInfoRequest> {
+    let hashed_name = Sha256::digest(name.as_bytes());
+    let hashed_string = hex::encode(hashed_name);
+
+    match reqwest::get(format!("{}/download/{}", relay, hashed_string)).await {
         Ok(resp) => {
             let json = resp.json::<TransferInfoRequest>().await?;
             debug!("Json Response: {:#?}", json);
