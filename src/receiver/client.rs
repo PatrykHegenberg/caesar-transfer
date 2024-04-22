@@ -74,7 +74,19 @@ pub async fn ping_sender(sender: &String) -> Result<bool> {
     }
 }
 
-pub async fn signal_success(sender: &String) -> Result<()> {
+pub async fn signal_success_relay(relay: &str, name: &str) -> Result<()> {
+    let hashed_name = Sha256::digest(name.as_bytes());
+    let hashed_string = hex::encode(hashed_name);
+    debug!("Signaling success to {:#?}", relay);
+    let client = Client::new();
+    let _ = client
+        .post(format!("{}/download_success/{}", relay, hashed_string))
+        .send()
+        .await?;
+    Ok(())
+}
+
+pub async fn signal_success_sender(sender: &String) -> Result<()> {
     debug!("Signaling shutdown to {:#?}", sender);
     let client = Client::new();
     let _ = client

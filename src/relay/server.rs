@@ -54,6 +54,7 @@ pub async fn start_server(port: Option<&i32>, listen_addr: Option<&String>) {
         .route("/status", get(status))
         .route("/upload", post(upload_info))
         .route("/download/:name", get(download_info))
+        .route("/download_success/:name", post(download_success))
         .with_state(shared_state)
         .layer(SecureClientIpSource::ConnectInfo.into_extension());
     let listener = tokio::net::TcpListener::bind(format!("{}:{}", app_host, app_port).to_string())
@@ -132,6 +133,52 @@ async fn status() -> impl IntoResponse {
     "message": "Service is running..."
     });
     (StatusCode::OK, Json(response))
+}
+
+async fn download_success(
+    State(shared_state): State<AppState>,
+    Path(name): Path<String>,
+) -> impl IntoResponse {
+    let mut data = shared_state.data.lock().unwrap();
+    if let Some(index) = data.iter().position(|request| request.body.name == name) {
+        debug!("Found Transfer by name '{name}'");
+        data.remove(index);
+        debug!("Transfer deleted");
+        return (
+            StatusCode::OK,
+            Json(json!({
+                "message": "transfer deleted"
+            })),
+        );
+    } else {
+        warn!("couldn't find transfer-name: {}", name);
+        return (
+            StatusCode::NOT_FOUND,
+            Json(json!({
+                "message": "transfer not found"
+            })),
+        );
+    }
+    // match data.iter().find(|request| request.body.name == name) {
+    //     Some(request) => {
+    //         debug!("Found transfer name.");
+    //         return (
+    //             StatusCode::OK,
+    //             Json(json!({
+    //                 "message" : "transfer deleted"
+    //             })),
+    //         );
+    //     }
+    //     None => {
+    //         warn!("couldn't find transfer-name: {}", name);
+    //         return (
+    //             StatusCode::NOT_FOUND,
+    //             Json(json!({
+    //                 "message" : "transfer not found"
+    //             })),
+    //         );
+    //     }
+    // }
 }
 
 async fn shutdown_signal() {

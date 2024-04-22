@@ -113,10 +113,16 @@ impl Args {
                             Ok(_) => match receiver::download_file(&res, overwrite).await {
                                 Ok(_) => {
                                     info!("Download complete");
-                                    let _ = match receiver::signal_success(&res.body.ip).await {
-                                        Ok(_) => Ok(()),
-                                        Err(err) => Err(err),
-                                    };
+                                    receiver::signal_success_relay(
+                                        relay.as_deref().unwrap_or("http://0.0.0.0:8000"),
+                                        name.as_deref().unwrap_or("None"),
+                                    )
+                                    .await?;
+                                    let _ =
+                                        match receiver::signal_success_sender(&res.body.ip).await {
+                                            Ok(_) => Ok(()),
+                                            Err(err) => Err(err),
+                                        };
                                 }
                                 Err(err) => error!(err),
                             },

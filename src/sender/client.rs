@@ -26,7 +26,7 @@ pub async fn send_info(relay: &str, file: &str) -> Result<String> {
 
     let client = Client::new();
     let res = client
-        .post(relay.to_string() + "/upload")
+        .post(format!("{}/upload", relay))
         .json(&map)
         .send()
         .await?;
