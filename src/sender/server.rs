@@ -1,4 +1,3 @@
-use crate::transfer_info::transfer_info::{TransferInfoBody, TransferInfoRequest};
 use axum::{
     extract::Json,
     http::StatusCode,

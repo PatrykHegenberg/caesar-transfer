@@ -144,20 +144,20 @@ async fn download_success(
         debug!("Found Transfer by name '{name}'");
         data.remove(index);
         debug!("Transfer deleted");
-        return (
+        (
             StatusCode::OK,
             Json(json!({
                 "message": "transfer deleted"
             })),
-        );
+        )
     } else {
         warn!("couldn't find transfer-name: {}", name);
-        return (
+        (
             StatusCode::NOT_FOUND,
             Json(json!({
                 "message": "transfer not found"
             })),
-        );
+        )
     }
     // match data.iter().find(|request| request.body.name == name) {
     //     Some(request) => {

@@ -17,7 +17,7 @@ pub async fn download_info(relay: &str, name: &str) -> Result<TransferInfoReques
         Ok(resp) => {
             let json = resp.json::<TransferInfoRequest>().await?;
             debug!("Json Response: {:#?}", json);
-            if json.message == "error".to_string() {
+            if json.message == *"error" {
                 Err(Box::new(TransferNotFoundError::new(
                     "no transfer with given name found",
                 )))
