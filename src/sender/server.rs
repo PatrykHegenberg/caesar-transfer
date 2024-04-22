@@ -19,7 +19,7 @@ lazy_static! {
 pub async fn serf_file(path: &String) {
     debug!("Sender starting...");
     let app_host = "0.0.0.0".to_string();
-    let app_port = "1300".to_string();
+    let app_port = "8100".to_string();
     debug!("Server configured to accept connections on host {app_host}...");
     debug!("Server configured to listen connections on port {app_port}...");
 

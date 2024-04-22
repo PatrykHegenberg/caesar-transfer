@@ -8,7 +8,7 @@ use tracing::{debug, error, info};
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
 pub async fn download_info(relay: &str, filename: &str) -> Result<TransferInfoRequest> {
-    match reqwest::get(format!("{}/download/{}", relay.to_string(), filename)).await {
+    match reqwest::get(format!("{}/download/{}", relay, filename)).await {
         Ok(resp) => {
             let json = resp.json::<TransferInfoRequest>().await?;
             debug!("Json Response: {:#?}", json);
@@ -36,11 +36,15 @@ pub async fn download_file(transfer_info: &TransferInfoRequest, overwrite: &bool
         )));
     }
 
-    let resp = reqwest::get(format!("http://{}:1300/download_file", &transfer_info.ip)).await?;
+    let resp = reqwest::get(format!(
+        "http://{}:8100/download_file",
+        &transfer_info.body.ip
+    ))
+    .await?;
     if !resp.status().is_success() {
         return Err(Box::new(std::io::Error::new(
             std::io::ErrorKind::Other,
-            format!("Failed to download file from {}", &transfer_info.ip),
+            format!("Failed to download file from {}", &transfer_info.body.ip),
         )));
     }
     let mut dest = File::create(&transfer_info.body.files)?;
@@ -52,7 +56,7 @@ pub async fn download_file(transfer_info: &TransferInfoRequest, overwrite: &bool
 
 pub async fn ping_sender(sender: &String) -> Result<bool> {
     debug!("Pinging Sender on {:#?}", sender);
-    match reqwest::get(format!("http://{}:1300/ping", sender)).await {
+    match reqwest::get(format!("http://{}:8100/ping", sender)).await {
         Ok(resp) => {
             debug!("Sender directly reachable");
             debug!("Response is: {:#?}", resp);
@@ -69,7 +73,7 @@ pub async fn signal_success(sender: &String) -> Result<()> {
     debug!("Signaling shutdown to {:#?}", sender);
     let client = Client::new();
     let _ = client
-        .post(format!("http://{}:1300/shutdown", sender))
+        .post(format!("http://{}:8100/shutdown", sender))
         .send()
         .await?;
     Ok(())

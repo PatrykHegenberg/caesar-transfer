@@ -34,7 +34,7 @@ pub async fn start_server(port: Option<&i32>, listen_addr: Option<&String>) {
     };
     let app_port = match port {
         Some(port) => port.to_string(),
-        None => env::var("APP_PORT").unwrap_or("1323".to_string()),
+        None => env::var("APP_PORT").unwrap_or("8000".to_string()),
     };
 
     debug!("Server configured to accept connections on host {app_host}...");
@@ -86,12 +86,12 @@ async fn download_info(
             (
                 StatusCode::NOT_FOUND,
                 Json(TransferInfoRequest {
-                    ip: "".to_string(),
                     name: "".to_string(),
                     message: "error".to_string(),
                     body: TransferInfoBody {
                         keyword: "".to_string(),
                         files: "".to_string(),
+                        ip: "".to_string(),
                     },
                 }),
             )
@@ -107,12 +107,12 @@ async fn upload_info(
     debug!("Got upload request from {}", addr.ip().to_string());
     let mut data = shared_state.data.lock().unwrap();
     let t_request = TransferInfoRequest {
-        ip: addr.ip().to_string(),
         name: generate_random_name(),
         message: "created".to_string(),
         body: TransferInfoBody {
             keyword: payload.keyword,
             files: payload.files,
+            ip: payload.ip,
         },
     };
     data.push(t_request.clone());
