@@ -30,6 +30,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    - name: Set up Protoc
+      uses: arduino-libraries/arduino-protoc-action@v1
+      with:
+        protoc-version: '3.21.12'
+
     - uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
