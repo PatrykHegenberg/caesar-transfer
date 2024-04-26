@@ -1,42 +1,37 @@
-name: Publish
+name: Build and Publish
 
 on:
   push:
+    branches: ["main"]
     tags:
       - '*'
 
 jobs:
   publish:
-    name: Publish for ${{ matrix.os }}
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        name: [
-            linux,
-            windows,
-            macos
-        ]
-
         include:
           - name: linux
             os: ubuntu-latest
-            artifact_name: target/release/<name>
-            asset_name: caesar-linux
+            artifact_name: caesar
+            asset_name: caesar-linux-amd64
           - name: windows
             os: windows-latest
-            artifact_name: target/release/<name>.exe
-            asset_name: caesar-windows
+            artifact_name: caesar.exe
+            asset_name: caesar-windows-amd64
           - name: macos
             os: macos-latest
-            artifact_name: target/release/<name>
-            asset_name: caesar-macos
+            artifact_name: caesar
+            asset_name: caesar-macos-amd64
 
     steps:
-    - uses: actions/checkout@v1
+    - name: Checkout
+      uses: actions/checkout@v3
 
     - uses: actions-rs/toolchain@v1
       with:
-        profile: minimal
         toolchain: stable
 
     - name: Build
