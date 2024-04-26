@@ -47,8 +47,6 @@ use tokio_tungstenite::{
 };
 use tracing::{debug, error};
 
-// const ORIGIN: &str = "ws://0.0.0.0:8000/ws";
-
 pub async fn start_sender(relay: &str, files: &[String]) {
     let Ok(mut request) = relay.into_client_request() else {
         println!("Error: Failed to create request.");
@@ -59,7 +57,7 @@ pub async fn start_sender(relay: &str, files: &[String]) {
         .headers_mut()
         .insert("Origin", HeaderValue::from_str(relay).unwrap());
 
-    debug!("Attempting to connect...");
+    debug!("Attempting to connect to {relay}...");
 
     let Ok((socket, _)) = connect_async(request).await else {
         error!("Error: Failed to connect.");

@@ -44,10 +44,8 @@ use tokio_tungstenite::{
     tungstenite::{client::IntoClientRequest, http::HeaderValue},
 };
 use tracing::error;
-use url::Url;
 
 pub async fn start_receiver(relay: &str, name: &str) {
-    let argument = name;
     let Ok(mut request) = relay.into_client_request() else {
         println!("Error: Failed to create request.");
         return;
@@ -66,17 +64,8 @@ pub async fn start_receiver(relay: &str, name: &str) {
         return;
     };
 
-    // If the URL is valid and contains an invite code fragment,
-    // extract it and pass it to the receiver::client::start
-    // function. The start function is defined in the
+    // The start function is defined in the
     // receiver::client module and is the function that interacts with
     // the server to receive files.
-    if let Ok(url) = Url::parse(argument) {
-        let Some(fragment) = url.fragment() else {
-            error!("Error: Missing invite code fragment in url.");
-            return;
-        };
-
-        receiver::start(socket, fragment).await
-    }
+    receiver::start(socket, name).await
 }

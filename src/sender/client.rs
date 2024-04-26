@@ -28,7 +28,6 @@ const DESTINATION: u8 = 1;
 const NONCE_SIZE: usize = 12;
 const MAX_CHUNK_SIZE: isize = u16::MAX as isize;
 const DELAY: Duration = Duration::from_millis(750);
-const URL: &str = "https://0.0.0.0:8000/#";
 
 /// A file that is to be sent.
 ///
@@ -120,7 +119,7 @@ struct Context {
 /// message to the console with the URL.
 fn on_create_room(context: &Context, id: String) -> Status {
     let base64 = general_purpose::STANDARD.encode(&context.hmac);
-    let url = format!("{}{}-{}", URL, id, base64);
+    let url = format!("{}-{}", id, base64);
 
     // Print a newline to the console to separate the output from the command
     // line.

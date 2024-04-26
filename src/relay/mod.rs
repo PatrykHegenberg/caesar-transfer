@@ -17,12 +17,11 @@
 /// host and port, it logs an error and exits.
 pub mod server;
 use axum::{
-    extract::{ws::WebSocket, ConnectInfo, State, WebSocketUpgrade},
+    extract::{ws::WebSocket, State, WebSocketUpgrade},
     response::IntoResponse,
     routing::get,
     Router,
 };
-use axum_client_ip::SecureClientIpSource;
 
 use futures_util::StreamExt;
 use std::{env, net::SocketAddr, sync::Arc};
@@ -32,7 +31,7 @@ use tokio::{
     sync::{Mutex, RwLock},
 };
 use tower_http::trace::{DefaultMakeSpan, TraceLayer};
-use tracing::{debug, error, info};
+use tracing::{debug, error, info, warn};
 
 use self::server::Client;
 
@@ -97,7 +96,6 @@ pub async fn start_ws(port: Option<&i32>, listen_addr: Option<&String>) {
     let app = Router::new()
         .route("/ws", get(ws_handler))
         .with_state(server)
-        .layer(SecureClientIpSource::ConnectInfo.into_extension())
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::default().include_headers(true)),
@@ -157,15 +155,15 @@ pub async fn start_ws(port: Option<&i32>, listen_addr: Option<&String>) {
 /// `handle_message` function is defined in the `src/relay/client.rs` file. The
 /// `handle_message` function handles incoming messages from the client and
 /// takes care of sending the appropriate response back to the client.
-async fn ws_handler(
+pub async fn ws_handler(
     ws: WebSocketUpgrade,
     State(shared_state): State<Arc<RwLock<server::Server>>>,
-    ConnectInfo(addr): ConnectInfo<SocketAddr>,
+    // ConnectInfo(addr): ConnectInfo<SocketAddr>,
 ) -> impl IntoResponse {
     debug!("Got Request on Websocket route");
-    debug!("WebSocket connection established from:{}", addr.to_string());
+    // debug!("WebSocket connection established from:{}", addr.to_string());
     debug!("Upgrading Connection");
-    ws.on_upgrade(move |socket| handle_socket(socket, addr, shared_state))
+    ws.on_upgrade(move |socket| handle_socket(socket, shared_state))
 }
 
 /// This function is called when a new WebSocket connection is established.
@@ -203,7 +201,7 @@ async fn ws_handler(
 /// `Client` object that it created. The `handle_close` method is defined in the
 /// `src/relay/client.rs` file. The `handle_close` method handles the close event
 /// from the client.
-async fn handle_socket(socket: WebSocket, who: SocketAddr, rooms: Arc<RwLock<server::Server>>) {
+async fn handle_socket(socket: WebSocket, rooms: Arc<RwLock<server::Server>>) {
     let (sender, mut receiver) = socket.split();
 
     let sender = Arc::new(Mutex::new(sender));
@@ -214,7 +212,7 @@ async fn handle_socket(socket: WebSocket, who: SocketAddr, rooms: Arc<RwLock<ser
                 client.handle_message(&rooms, message).await;
             }
             Err(error) => {
-                error!("Failed to read message from client {}: {}", who, error);
+                warn!("Failed to read message from client: {}", error);
                 break;
             }
         }
