@@ -17,23 +17,13 @@ jobs:
             os: ubuntu-latest
             artifact_name: caesar
             asset_name: caesar-linux-amd64
-          - name: windows
-            os: windows-latest
-            artifact_name: caesar.exe
-            asset_name: caesar-windows-amd64
-          - name: macos
-            os: macos-latest
-            artifact_name: caesar
-            asset_name: caesar-macos-amd64
 
     steps:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - name: Set up Protoc
-      uses: arduino-libraries/arduino-protoc-action@v1
-      with:
-        protoc-version: '3.21.12'
+    - name: Install deps
+      run: sudo apt-get -y install protobuf-compiler
 
     - uses: actions-rs/toolchain@v1
       with:
