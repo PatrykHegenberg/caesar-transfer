@@ -1,5 +1,5 @@
 [package]
-name = "caesar_test"
+name = "caesar"
 version = "0.0.1"
 edition = "2021"
 build = "src/build.rs"
