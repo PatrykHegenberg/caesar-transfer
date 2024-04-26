@@ -1,5 +1,8 @@
 use crate::cli::args::Args;
+#[cfg(not(feature = "shuttle"))]
 use dotenv::dotenv;
+#[cfg(feature = "shuttle")]
+use dotenvy::dotenv;
 #[cfg(feature = "shuttle")]
 use shuttle_axum::ShuttleAxum;
 use tracing::error;
@@ -43,6 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 #[cfg(feature = "shuttle")]
 #[shuttle_runtime::main]
 async fn main() -> ShuttleAxum {
+    dotenv().ok();
     let app_host = env::var("APP_HOST").unwrap_or("0.0.0.0".to_string());
     let app_port = env::var("APP_PORT").unwrap_or("8000".to_string());
 
