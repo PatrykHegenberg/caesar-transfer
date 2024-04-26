@@ -150,7 +150,7 @@ impl Args {
                 sender::start_sender(
                     relay.as_deref().unwrap_or(
                         env::var("APP_ORIGIN")
-                            .unwrap_or("ws://0.0.0.0:8000/ws".to_string())
+                            .unwrap_or("wss://caesar-transfer-iu.shuttleapp.rs/ws".to_string())
                             .as_str(),
                     ),
                     files,
