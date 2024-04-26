@@ -72,18 +72,10 @@ pub async fn start_ws(port: Option<&i32>, listen_addr: Option<&String>) {
         Some(port) => port.to_string(),
         None => env::var("APP_PORT").unwrap_or("8000".to_string()),
     };
-    let app_domain = env::var("APP_DOMAIN").unwrap_or("".to_string());
 
     // Log information about the server's configuration.
-    debug!(
-        "Server configured to accept connections on host {app_host}...",
-    );
-    debug!(
-        "Server configured to listen connections on port {app_port}...",
-    );
-    debug!(
-        "Server configured to listen connections on port {app_domain}...",
-    );
+    debug!("Server configured to accept connections on host {app_host}...",);
+    debug!("Server configured to listen connections on port {app_port}...",);
 
     // Based on the environment variable, set the logging level.
     match app_environemt.as_str() {
@@ -130,7 +122,6 @@ pub async fn start_ws(port: Option<&i32>, listen_addr: Option<&String>) {
     }
 }
 
-
 /// This function is an endpoint for the WebSocket route.
 ///
 /// This function is called whenever a client makes a WebSocket request to
@@ -176,7 +167,6 @@ async fn ws_handler(
     debug!("Upgrading Connection");
     ws.on_upgrade(move |socket| handle_socket(socket, addr, shared_state))
 }
-
 
 /// This function is called when a new WebSocket connection is established.
 /// The function takes three arguments:
@@ -233,7 +223,6 @@ async fn handle_socket(socket: WebSocket, who: SocketAddr, rooms: Arc<RwLock<ser
     client.handle_close(&rooms).await
 }
 
-
 /// This function sets up a signal handler for SIGINT (Ctrl+C) and SIGTERM
 /// (terminate) on Unix platforms. It does nothing on non-Unix platforms.
 ///
@@ -285,4 +274,3 @@ async fn shutdown_signal() {
         _ = terminate => {},
     }
 }
-
