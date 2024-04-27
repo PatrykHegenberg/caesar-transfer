@@ -110,6 +110,7 @@ pub enum JsonPacketResponse {
 ///   written from the perspective of the user and should give the user enough
 ///   information to understand what went wrong and how they might be able to
 ///   fix the problem.
+#[derive(Debug, PartialEq)]
 pub enum Status {
     /// Indicates that the event loop should continue processing events.
     Continue(),

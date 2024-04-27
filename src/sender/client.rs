@@ -704,3 +704,170 @@ pub async fn start(socket: Socket, paths: Vec<String>) {
     // `outgoing_handler` completes, return the result of the `outgoing_handler`.
     future::select(incoming_handler, outgoing_handler).await;
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use aes_gcm::KeyInit;
+
+    #[test]
+    fn test_on_chunk() {
+        let (sender, _) = flume::bounded(1000);
+        let mut context = Context {
+            hmac: vec![],
+            sender: sender,
+            key: EphemeralSecret::random(&mut OsRng),
+            shared_key: None,
+            files: vec![
+                File {
+                    name: "file1.txt".to_string(),
+                    size: 100,
+                    path: "file1.txt".to_string(),
+                },
+                File {
+                    name: "file2.txt".to_string(),
+                    size: 100,
+                    path: "file2.txt".to_string(),
+                },
+            ],
+            task: None,
+        };
+    }
+    #[test]
+    fn test_on_progress() {
+        let (sender, _) = flume::bounded(1000);
+        let mut context = Context {
+            hmac: vec![],
+            sender: sender,
+            key: EphemeralSecret::random(&mut OsRng),
+            shared_key: Some(Aes128Gcm::new(Key::<Aes128Gcm>::from_slice(&[0u8; 16]))),
+            files: vec![
+                File {
+                    name: "file1.txt".to_string(),
+                    size: 100,
+                    path: "file1.txt".to_string(),
+                },
+                File {
+                    name: "file2.txt".to_string(),
+                    size: 100,
+                    path: "file2.txt".to_string(),
+                },
+            ],
+            task: None,
+        };
+        assert_eq!(on_progress(&context, ProgressPacket { index: 0, progress: 50 }), Status::Continue());
+    }
+    #[test]
+    fn test_on_create_room() {
+        let (sender, _) = flume::bounded(1000);
+        let mut context = Context {
+            hmac: vec![],
+            sender: sender,
+            key: EphemeralSecret::random(&mut OsRng),
+            shared_key: None,
+            files: vec![
+                File {
+                    name: "file1.txt".to_string(),
+                    size: 100,
+                    path: "file1.txt".to_string(),
+                },
+                File {
+                    name: "file2.txt".to_string(),
+                    size: 100,
+                    path: "file2.txt".to_string(),
+                },
+            ],
+            task: None,
+        };
+        assert_eq!(
+            on_create_room(
+                &context,
+                "b531e87d-e51a-4507-94f4-335cbe2d32f3-Nc5skZReq7qJN7INwckyAZLWEEbxsrFfH/692tUNgkM="
+                    .to_string()
+            ),
+            Status::Continue()
+        );
+    }
+    // #[test]
+    // fn test_on_join_room(){
+    //     let (sender, _) = flume::bounded(1000);
+    //     let mut context = Context {
+    //         hmac: vec![],
+    //         sender: sender,
+    //         key: EphemeralSecret::random(&mut OsRng),
+    //         shared_key: None,
+    //         files: vec![
+    //             File {
+    //                 name: "file1.txt".to_string(),
+    //                 size: 100,
+    //                 path: "file1.txt".to_string(),
+    //             },
+    //             File {
+    //                 name: "file2.txt".to_string(),
+    //                 size: 100,
+    //                 path: "file2.txt".to_string(),
+    //             },
+    //         ],
+    //         task: None,
+    //     };
+    //     assert_eq!(on_join_room(&context, None), Status::Continue());
+    // }
+    #[test]
+    fn test_on_error() {
+        assert_eq!(
+            on_error("Error message".to_string()),
+            Status::Err("Error message".to_string())
+        );
+    }
+    #[test]
+    fn test_on_leave_room() {
+        let (sender, _) = flume::bounded(1000);
+        let mut context = Context {
+            hmac: vec![],
+            sender: sender,
+            key: EphemeralSecret::random(&mut OsRng),
+            shared_key: None,
+            files: vec![
+                File {
+                    name: "file1.txt".to_string(),
+                    size: 100,
+                    path: "file1.txt".to_string(),
+                },
+                File {
+                    name: "file2.txt".to_string(),
+                    size: 100,
+                    path: "file2.txt".to_string(),
+                },
+            ],
+            task: None,
+        };
+        assert_eq!(on_leave_room(&mut context, 5), Status::Continue());
+    }
+    #[test]
+    fn test_on_message() {
+        let (sender, _) = flume::bounded(1000);
+        let mut context = Context {
+            hmac: vec![],
+            sender: sender,
+            key: EphemeralSecret::random(&mut OsRng),
+            shared_key: None,
+            files: vec![
+                File {
+                    name: "file1.txt".to_string(),
+                    size: 100,
+                    path: "file1.txt".to_string(),
+                },
+                File {
+                    name: "file2.txt".to_string(),
+                    size: 100,
+                    path: "file2.txt".to_string(),
+                },
+            ],
+            task: None,
+        };
+    assert_eq!(on_message(&mut context, WebSocketMessage::Text(r#"{"type":"leave","index":5}"#.to_string())), Status::Continue());
+    assert_eq!(on_message(&mut context, WebSocketMessage::Text(r#"{"type":"create","id":"b531e87d-e51a-4507-94f4-335cbe2d32f3-Nc5skZReq7qJN7INwckyAZLWEEbxsrFfH/692tUNgkM="}"#.to_string())), Status::Continue()); 
+    assert_eq!(on_message(&mut context, WebSocketMessage::Text(r#"{"type":"error","message":"Error Message: Test"}"#.to_string())), Status::Err("Error Message: Test".to_string())); 
+        
+    }
+    }

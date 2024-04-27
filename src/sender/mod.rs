@@ -63,40 +63,11 @@ pub async fn start_sender(relay: &str, files: &[String]) {
                 }
                 Err(e) => {
                     error!("Error: Failed to connect with error: {e}");
-                    return;
                 }
             }
         }
         Err(e) => {
             error!("Error: failed to create request with reason: {e:?}");
-            return;
         }
     }
-    // let Ok(mut request) = relay.into_client_request() else {
-    //     println!("Error: Failed to create request.");
-    //     return;
-    // };
-
-    // request
-    //     .headers_mut()
-    //     .insert("Origin", HeaderValue::from_str(relay).unwrap());
-
-    // debug!("Attempting to connect to {relay}...");
-
-    // match connect_async(request).await {
-    //     Ok((socket, _)) => {
-    //         let paths = files.to_vec();
-    //         sender::start(socket, paths).await;
-    //     }
-    //     Err(e) => {
-    //         error!("Error: Failed to connect with error: {e}");
-    //         return;
-    //     }
-    // }
-    // let Ok((socket, _)) = connect_async(request).await else {
-    //     error!("Error: Failed to connect.");
-    //     return;
-    // };
-    // let paths = files.to_vec();
-    // sender::start(socket, paths).await
 }

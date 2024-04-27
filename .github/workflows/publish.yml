@@ -15,8 +15,8 @@ jobs:
         include:
           - name: linux
             os: ubuntu-latest
-            artifact_name: caesar
-            asset_name: caesar-linux-amd64
+            artifact_name: target/release/caesar
+            asset_name: caesar-linux
 
     steps:
     - name: Checkout

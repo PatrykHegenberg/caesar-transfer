@@ -606,3 +606,156 @@ pub async fn start(socket: Socket, fragment: &str) {
     // Wait for either future to complete
     future::select(incoming_handler, outgoing_handler).await;
 }
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use aes_gcm::KeyInit;
+    use tokio_tungstenite::tungstenite::Message as WebSocketMessage;
+
+    #[test]
+    fn test_on_join_room_valid_size() {
+        assert_eq!(on_join_room(Some(10)), Status::Continue());
+    }
+    #[test]
+    fn test_on_join_room_invalid_size() {
+        assert_eq!(
+            on_join_room(None),
+            Status::Err("Invalid join room packet.".into())
+        );
+    }
+    #[test]
+    fn test_on_error_with_message() {
+        assert_eq!(
+            on_error("Error message".to_string()),
+            Status::Err("Error message".to_string())
+        );
+    }
+    #[test]
+    fn test_on_leave_room() {
+        let (sender, _) = flume::bounded(1000);
+        let mut context = Context {
+            hmac: vec![],
+            sender: sender,
+            key: EphemeralSecret::random(&mut OsRng),
+            shared_key: None,
+            files: vec![
+                File {
+                    name: "file1.txt".to_string(),
+                    size: 100,
+                    progress: 100,
+                    handle: fs::File::create("file1.txt").unwrap(),
+                },
+                File {
+                    name: "file2.txt".to_string(),
+                    size: 100,
+                    progress: 50,
+                    handle: fs::File::create("file2.txt").unwrap(),
+                },
+            ],
+            sequence: 0,
+            index: 0,
+            progress: 0,
+            length: 0,
+        };
+
+        assert_eq!(
+            on_leave_room(&mut context, 0),
+            Status::Err("Transfer was interrupted because the host left the room.".into())
+        );
+        context.files[1].progress = 100;
+        assert_eq!(on_leave_room(&mut context, 0), Status::Exit());
+    }
+    #[test]
+    fn test_on_message_text_join() {
+        let (sender, _) = flume::bounded(1000);
+        let mut context = Context {
+            hmac: vec![],
+            sender: sender,
+            key: EphemeralSecret::random(&mut OsRng),
+            shared_key: None,
+            files: vec![],
+            sequence: 0,
+            index: 0,
+            progress: 0,
+            length: 0,
+        };
+
+        let text_message = WebSocketMessage::Text(r#"{"type":"join","size":10}"#.to_string());
+        assert_eq!(on_message(&mut context, text_message), Status::Continue());
+    }
+
+    #[test]
+    fn test_on_chunk() {
+        let (sender, _) = flume::bounded(1000);
+        // let mut context = Context {
+        //     hmac: vec![],
+        //     sender: sender.clone(),
+        //     key: EphemeralSecret::random(&mut OsRng),
+        //     shared_key: Some(Aes128Gcm::new(Key::<Aes128Gcm>::from_slice(&[0u8; 16]))),
+        //     files: vec![File {
+        //         name: "file1.txt".to_string(),
+        //         size: 100,
+        //         progress: 0,
+        //         handle: fs::File::create("file1.txt").unwrap(),
+        //     }],
+        //     sequence: 0,
+        //     index: 0,
+        //     progress: 0,
+        //     length: 0,
+        // };
+
+        // let chunk_packet = ChunkPacket {
+        //     sequence: 0,
+        //     chunk: b"Hello, world!".to_vec(),
+        // };
+        // assert_eq!(on_chunk(&mut context, chunk_packet), Status::Continue());
+        // assert_eq!(context.sequence, 1);
+        // assert_eq!(context.length, 14);
+        // assert_eq!(context.progress, 14);
+
+        // let chunk_packet = ChunkPacket {
+        //     sequence: 1,
+        //     chunk: b"Hello, world!".to_vec(),
+        // };
+        // assert_eq!(
+        //     on_chunk(&mut context, chunk_packet),
+        //     Status::Err("Expected sequence 1, but got 1.".into())
+        // );
+
+        // context.files.clear();
+        // let chunk_packet = ChunkPacket {
+        //     sequence: 0,
+        //     chunk: b"Hello, world!".to_vec(),
+        // };
+        // assert_eq!(
+        //     on_chunk(&mut context, chunk_packet),
+        //     Status::Err("Invalid file index.".into())
+        // );
+
+        // Test a chunk packet with no shared key
+        let mut context = Context {
+            hmac: vec![],
+            sender: sender,
+            key: EphemeralSecret::random(&mut OsRng),
+            shared_key: None,
+            files: vec![File {
+                name: "file1.txt".to_string(),
+                size: 100,
+                progress: 0,
+                handle: fs::File::create("file1.txt").unwrap(),
+            }],
+            sequence: 0,
+            index: 0,
+            progress: 0,
+            length: 0,
+        };
+        let chunk_packet = ChunkPacket {
+            sequence: 0,
+            chunk: b"Hello, world!".to_vec(),
+        };
+        assert_eq!(
+            on_chunk(&mut context, chunk_packet),
+            Status::Err("Invalid chunk packet: no shared key established".into())
+        );
+    }
+}
