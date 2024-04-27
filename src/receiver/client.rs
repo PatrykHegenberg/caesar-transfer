@@ -609,7 +609,6 @@ pub async fn start(socket: Socket, fragment: &str) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use aes_gcm::KeyInit;
     use tokio_tungstenite::tungstenite::Message as WebSocketMessage;
 
     #[test]
@@ -635,7 +634,7 @@ mod tests {
         let (sender, _) = flume::bounded(1000);
         let mut context = Context {
             hmac: vec![],
-            sender: sender,
+            sender,
             key: EphemeralSecret::random(&mut OsRng),
             shared_key: None,
             files: vec![
@@ -670,7 +669,7 @@ mod tests {
         let (sender, _) = flume::bounded(1000);
         let mut context = Context {
             hmac: vec![],
-            sender: sender,
+            sender,
             key: EphemeralSecret::random(&mut OsRng),
             shared_key: None,
             files: vec![],
@@ -735,7 +734,7 @@ mod tests {
         // Test a chunk packet with no shared key
         let mut context = Context {
             hmac: vec![],
-            sender: sender,
+            sender,
             key: EphemeralSecret::random(&mut OsRng),
             shared_key: None,
             files: vec![File {
