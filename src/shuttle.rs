@@ -11,12 +11,12 @@ pub mod shared;
 #[shuttle_runtime::main]
 async fn axum() -> ShuttleAxum {
     // Create a new server data structure.
-    let server = server::Server::new();
+    let appstate = server::AppState::new();
 
     // Set up the application routes.
     let app = Router::new()
         .route("/ws", get(relay::ws_handler))
-        .with_state(server)
+        .with_state(appstate)
         .layer(SecureClientIpSource::ConnectInfo.into_extension());
 
     Ok(app.into())

@@ -145,11 +145,11 @@ impl Room {
 /// room as the value. This means that looking up a room by its ID is an O(1)
 /// operation, which is very fast.
 #[derive(Debug)]
-pub struct Server {
+pub struct AppState {
     pub rooms: HashMap<String, Room>,
 }
 
-impl Server {
+impl AppState {
     /// Creates a new `Server` with an empty list of rooms.
     ///
     /// The `rooms` field of the returned `Server` is an empty `HashMap`.
@@ -175,9 +175,9 @@ impl Server {
     /// different parts of the program. The `Server` is shared because it
     /// needs to be able to handle connections from multiple clients at the
     /// same time.
-    pub fn new() -> Arc<RwLock<Server>> {
+    pub fn new() -> Arc<RwLock<AppState>> {
         // Create a new `Server` instance.
-        Arc::new(RwLock::new(Server {
+        Arc::new(RwLock::new(AppState {
             // Initialize the list of rooms to be empty.
             rooms: HashMap::new(),
         }))
@@ -329,7 +329,7 @@ impl Client {
     /// thread can access the server's state at a time. This is because the
     /// server's state is not thread-safe, and accessing it from multiple
     /// threads could result in undefined behavior.
-    async fn handle_create_room(&mut self, server: &RwLock<Server>) {
+    async fn handle_create_room(&mut self, server: &RwLock<AppState>) {
         let mut server = server.write().await;
 
         // If the current client is already in a room, do nothing.
@@ -393,7 +393,7 @@ impl Client {
     /// function sends a JoinRoom response packet to the client with the size
     /// of the room (excluding the client itself) and a `size` field set to
     /// `None`. The response packet is sent to all other clients in the room.
-    async fn handle_join_room(&mut self, server: &RwLock<Server>, room_id: String) {
+    async fn handle_join_room(&mut self, server: &RwLock<AppState>, room_id: String) {
         let mut server = server.write().await;
 
         // If the client is already in a room, do nothing.
@@ -474,7 +474,7 @@ impl Client {
     ///    of rooms.
     /// 8. Drops the write lock on the server's state.
     /// 9. Waits for all futures to complete.
-    async fn handle_leave_room(&mut self, server: &RwLock<Server>) {
+    async fn handle_leave_room(&mut self, server: &RwLock<AppState>) {
         // Obtain a write lock on the server's state.
         let mut server = server.write().await;
 
@@ -566,7 +566,7 @@ impl Client {
     ///
     /// If the message is `Close`, the function prints a message to stdout and calls the
     /// `handle_close` function.
-    pub async fn handle_message(&mut self, server: &RwLock<Server>, message: Message) {
+    pub async fn handle_message(&mut self, server: &RwLock<AppState>, message: Message) {
         match message {
             Message::Text(text) => {
                 let packet = match serde_json::from_str(&text) {
@@ -657,7 +657,7 @@ impl Client {
         }
     }
 
-    pub async fn handle_close(&mut self, server: &RwLock<Server>) {
+    pub async fn handle_close(&mut self, server: &RwLock<AppState>) {
         self.handle_leave_room(server).await
     }
 }

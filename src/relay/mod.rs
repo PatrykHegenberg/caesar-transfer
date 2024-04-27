@@ -90,7 +90,7 @@ pub async fn start_ws(port: Option<&i32>, listen_addr: Option<&String>) {
     }
 
     // Create a new server data structure.
-    let server = server::Server::new();
+    let server = server::AppState::new();
 
     // Set up the application routes.
     let app = Router::new()
@@ -157,7 +157,7 @@ pub async fn start_ws(port: Option<&i32>, listen_addr: Option<&String>) {
 /// takes care of sending the appropriate response back to the client.
 pub async fn ws_handler(
     ws: WebSocketUpgrade,
-    State(shared_state): State<Arc<RwLock<server::Server>>>,
+    State(shared_state): State<Arc<RwLock<server::AppState>>>,
     // ConnectInfo(addr): ConnectInfo<SocketAddr>,
 ) -> impl IntoResponse {
     debug!("Got Request on Websocket route");
@@ -201,7 +201,7 @@ pub async fn ws_handler(
 /// `Client` object that it created. The `handle_close` method is defined in the
 /// `src/relay/client.rs` file. The `handle_close` method handles the close event
 /// from the client.
-async fn handle_socket(socket: WebSocket, rooms: Arc<RwLock<server::Server>>) {
+async fn handle_socket(socket: WebSocket, rooms: Arc<RwLock<server::AppState>>) {
     let (sender, mut receiver) = socket.split();
 
     let sender = Arc::new(Mutex::new(sender));
