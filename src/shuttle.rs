@@ -1,6 +1,7 @@
+use crate::relay::appstate::AppState;
+use crate::relay::server::ws_handler;
 use axum::{routing::get, Router};
 use axum_client_ip::SecureClientIpSource;
-use relay::server;
 use shuttle_axum::ShuttleAxum;
 
 pub mod receiver;
@@ -11,11 +12,11 @@ pub mod shared;
 #[shuttle_runtime::main]
 async fn axum() -> ShuttleAxum {
     // Create a new server data structure.
-    let appstate = server::AppState::new();
+    let appstate = AppState::new();
 
     // Set up the application routes.
     let app = Router::new()
-        .route("/ws", get(relay::ws_handler))
+        .route("/ws", get(ws_handler))
         .with_state(appstate)
         .layer(SecureClientIpSource::ConnectInfo.into_extension());
 
