@@ -16,7 +16,7 @@
 /// and running the application. If the server fails to bind to the specified
 /// host and port, it logs an error and exits.
 use axum::{
-    extract::{ws::WebSocket, Json, State, WebSocketUpgrade},
+    extract::{ws::WebSocket, Json, Path, State, WebSocketUpgrade},
     http::StatusCode,
     response::IntoResponse,
     routing::{get, post},
@@ -98,6 +98,7 @@ pub async fn start_ws(port: Option<&i32>, listen_addr: Option<&String>) {
     let app = Router::new()
         .route("/ws", get(ws_handler))
         .route("/upload", post(upload_info))
+        .route("/download/:name", get(download_info))
         .with_state(server)
         .layer(
             TraceLayer::new_for_http()
@@ -294,4 +295,28 @@ pub async fn upload_info(
     debug!("Actual AppState is {:#?}", *data);
 
     (StatusCode::CREATED, Json(t_request))
+}
+
+pub async fn download_info(
+    State(shared_state): State<Arc<RwLock<AppState>>>,
+    Path(name): Path<String>,
+) -> impl IntoResponse {
+    let data = shared_state.write().await;
+    match data.transfers.iter().find(|request| request.name == name) {
+        Some(request) => {
+            debug!("Found transfer name.");
+            (StatusCode::OK, Json(request.clone()))
+        }
+        None => {
+            warn!("couldn't find transfer-name: {}", name);
+            (
+                StatusCode::NOT_FOUND,
+                Json(Transfer {
+                    name: "".to_string(),
+                    ip: "".to_string(),
+                    room_id: "".to_string(),
+                }),
+            )
+        }
+    }
 }
