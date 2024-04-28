@@ -24,6 +24,7 @@ use axum::{
 };
 
 use futures_util::StreamExt;
+use serde_json::json;
 use std::{env, net::SocketAddr, sync::Arc};
 use tokio::{
     net::TcpListener,
@@ -99,6 +100,7 @@ pub async fn start_ws(port: Option<&i32>, listen_addr: Option<&String>) {
         .route("/ws", get(ws_handler))
         .route("/upload", post(upload_info))
         .route("/download/:name", get(download_info))
+        .route("/download_success/:name", post(download_success))
         .with_state(server)
         .layer(
             TraceLayer::new_for_http()
@@ -319,4 +321,54 @@ pub async fn download_info(
             )
         }
     }
+}
+
+pub async fn download_success(
+    State(shared_state): State<Arc<RwLock<AppState>>>,
+    Path(name): Path<String>,
+) -> impl IntoResponse {
+    let mut data = shared_state.write().await;
+    if let Some(index) = data
+        .transfers
+        .iter()
+        .position(|request| request.name == name)
+    {
+        debug!("Found Transfer by name '{name}'");
+        data.transfers.remove(index);
+        debug!("Transfer deleted");
+        (
+            StatusCode::OK,
+            Json(json!({
+                "message": "transfer deleted"
+            })),
+        )
+    } else {
+        warn!("couldn't find transfer-name: {}", name);
+        (
+            StatusCode::NOT_FOUND,
+            Json(json!({
+                "message": "transfer not found"
+            })),
+        )
+    }
+    // match data.iter().find(|request| request.body.name == name) {
+    //     Some(request) => {
+    //         debug!("Found transfer name.");
+    //         return (
+    //             StatusCode::OK,
+    //             Json(json!({
+    //                 "message" : "transfer deleted"
+    //             })),
+    //         );
+    //     }
+    //     None => {
+    //         warn!("couldn't find transfer-name: {}", name);
+    //         return (
+    //             StatusCode::NOT_FOUND,
+    //             Json(json!({
+    //                 "message" : "transfer not found"
+    //             })),
+    //         );
+    //     }
+    // }
 }
