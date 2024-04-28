@@ -36,6 +36,7 @@
 /// The `start` function takes ownership of the WebSocket stream and
 /// the file paths, so we pass them by value.
 pub mod client;
+pub mod http_client;
 
 use crate::receiver::client as receiver;
 
@@ -43,10 +44,18 @@ use tokio_tungstenite::{
     connect_async,
     tungstenite::{client::IntoClientRequest, http::HeaderValue},
 };
-use tracing::error;
+use tracing::{debug, error};
 
 pub async fn start_receiver(relay: &str, name: &str) {
-    let Ok(mut request) = relay.into_client_request() else {
+    let room_id = http_client::download_info(relay, name).await.unwrap();
+    debug!("Got Room_ID from Server: {room_id}");
+
+    start_ws_com(relay, room_id.as_str()).await;
+}
+
+pub async fn start_ws_com(relay: &str, name: &str) {
+    let url = String::from("ws://") + relay + "/ws";
+    let Ok(mut request) = url.into_client_request() else {
         println!("Error: Failed to create request.");
         return;
     };
@@ -59,13 +68,17 @@ pub async fn start_receiver(relay: &str, name: &str) {
 
     println!("Attempting to connect...");
 
-    let Ok((socket, _)) = connect_async(request).await else {
-        error!("Error: Failed to connect.");
-        return;
-    };
+    // let Ok((socket, _)) = connect_async(request).await else {
+    //     error!("Error: Failed to connect.");
+    //     return;
+    // };
 
+    match connect_async(request).await {
+        Ok((socket, _)) => receiver::start(socket, name).await,
+        Err(e) => error!("Error: Failed to connect: {e:?}"),
+    };
     // The start function is defined in the
     // receiver::client module and is the function that interacts with
     // the server to receive files.
-    receiver::start(socket, name).await
+    // receiver::start(socket, name).await
 }
