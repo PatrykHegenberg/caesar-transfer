@@ -71,3 +71,16 @@ impl Room {
         }
     }
 }
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_room_new() {
+        let room = Room::new(5);
+
+        assert_eq!(room.size, 5);
+
+        assert!(room.senders.is_empty());
+    }
+}

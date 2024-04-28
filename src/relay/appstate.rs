@@ -46,4 +46,18 @@ impl AppState {
             rooms: HashMap::new(),
         }))
     }
+
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::{Arc};
+
+    #[test]
+    fn test_new() {
+        let app_state = AppState::new();
+
+        assert!(Arc::ptr_eq(&app_state, &app_state.clone()));
+    }
 }

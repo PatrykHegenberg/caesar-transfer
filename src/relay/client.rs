@@ -488,3 +488,9 @@ impl Client {
         self.handle_leave_room(server).await
     }
 }
+// TODO: Add tests
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+}
