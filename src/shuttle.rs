@@ -1,6 +1,11 @@
 use crate::relay::appstate::AppState;
+use crate::relay::server::upload_info;
 use crate::relay::server::ws_handler;
-use axum::{routing::get, Router};
+use axum::{
+    extract::connect_info::ConnectInfo,
+    routing::{get, post},
+    Extension, Router,
+};
 use axum_client_ip::SecureClientIpSource;
 use shuttle_axum::ShuttleAxum;
 
@@ -17,6 +22,7 @@ async fn axum() -> ShuttleAxum {
     // Set up the application routes.
     let app = Router::new()
         .route("/ws", get(ws_handler))
+        .route("/upload", post(upload_info))
         .with_state(appstate)
         .layer(SecureClientIpSource::ConnectInfo.into_extension());
 
