@@ -2,6 +2,7 @@ use std::{collections::HashMap, sync::Arc};
 use tokio::sync::RwLock;
 
 use crate::relay::room::Room;
+use crate::relay::transfer::Transfer;
 
 /// A struct that holds all of the rooms that the server knows about.
 ///
@@ -11,6 +12,7 @@ use crate::relay::room::Room;
 #[derive(Debug)]
 pub struct AppState {
     pub rooms: HashMap<String, Room>,
+    pub transfers: Vec<Transfer>,
 }
 
 impl AppState {
@@ -44,15 +46,15 @@ impl AppState {
         Arc::new(RwLock::new(AppState {
             // Initialize the list of rooms to be empty.
             rooms: HashMap::new(),
+            transfers: Vec::new(),
         }))
     }
-
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::{Arc};
+    use std::sync::Arc;
 
     #[test]
     fn test_new() {
