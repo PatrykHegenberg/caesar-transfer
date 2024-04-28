@@ -1,6 +1,8 @@
+use hex;
 use rand::{seq::SliceRandom, thread_rng};
+use sha2::{Digest, Sha256};
 
-fn generate_random_name() -> String {
+pub fn generate_random_name() -> String {
     let mut rng = thread_rng();
     let adjective = adjectives().choose(&mut rng).unwrap();
     // let adjective = adjectives().sample(&mut rng).unwrap();
@@ -24,6 +26,12 @@ fn nouns2() -> &'static [&'static str] {
     static NOUNS2: &[&str] = &["cookie", "cake", "frosting"];
     NOUNS2
 }
+
+pub fn hash_random_name(name: String) -> String {
+    let hashed_name = Sha256::digest(name.as_bytes());
+    return hex::encode(hashed_name);
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

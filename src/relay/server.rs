@@ -314,9 +314,9 @@ pub async fn download_info(
             (
                 StatusCode::NOT_FOUND,
                 Json(Transfer {
-                    name: "".to_string(),
-                    ip: "".to_string(),
-                    room_id: "".to_string(),
+                    name: String::from(""),
+                    ip: String::from(""),
+                    room_id: String::from(""),
                 }),
             )
         }
@@ -351,24 +351,4 @@ pub async fn download_success(
             })),
         )
     }
-    // match data.iter().find(|request| request.body.name == name) {
-    //     Some(request) => {
-    //         debug!("Found transfer name.");
-    //         return (
-    //             StatusCode::OK,
-    //             Json(json!({
-    //                 "message" : "transfer deleted"
-    //             })),
-    //         );
-    //     }
-    //     None => {
-    //         warn!("couldn't find transfer-name: {}", name);
-    //         return (
-    //             StatusCode::NOT_FOUND,
-    //             Json(json!({
-    //                 "message" : "transfer not found"
-    //             })),
-    //         );
-    //     }
-    // }
 }
