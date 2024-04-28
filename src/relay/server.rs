@@ -16,9 +16,10 @@
 /// and running the application. If the server fails to bind to the specified
 /// host and port, it logs an error and exits.
 use axum::{
-    extract::{ws::WebSocket, State, WebSocketUpgrade},
+    extract::{ws::WebSocket, Json, State, WebSocketUpgrade},
+    http::StatusCode,
     response::IntoResponse,
-    routing::get,
+    routing::{get, post},
     Router,
 };
 
@@ -34,6 +35,7 @@ use tracing::{debug, error, info, warn};
 
 use crate::relay::appstate::AppState;
 use crate::relay::client::Client;
+use crate::relay::transfer::Transfer;
 
 /// This function starts the WebSocket server.
 ///
@@ -95,6 +97,7 @@ pub async fn start_ws(port: Option<&i32>, listen_addr: Option<&String>) {
     // Set up the application routes.
     let app = Router::new()
         .route("/ws", get(ws_handler))
+        .route("/upload", post(upload_info))
         .with_state(server)
         .layer(
             TraceLayer::new_for_http()
@@ -271,4 +274,24 @@ async fn shutdown_signal() {
         // nothing else.
         _ = terminate => {},
     }
+}
+
+pub async fn upload_info(
+    State(shared_state): State<Arc<RwLock<AppState>>>,
+    // ConnectInfo(addr): ConnectInfo<SocketAddr>,
+    Json(payload): Json<Transfer>,
+) -> impl IntoResponse {
+    // debug!("Got upload request from {}", addr.ip().to_string());
+    let mut data = shared_state.write().await;
+    let t_request = Transfer {
+        name: payload.name,
+        ip: payload.ip,
+        room_id: payload.room_id,
+    };
+    data.transfers.push(t_request.clone());
+
+    debug!("New TransferRequest created");
+    debug!("Actual AppState is {:#?}", *data);
+
+    (StatusCode::CREATED, Json(t_request))
 }
