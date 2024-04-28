@@ -39,6 +39,7 @@
 /// The `start` function takes ownership of the `WebSocketStream` and the file
 /// paths, so we pass it the `paths` vector by value.
 pub mod client;
+pub mod util;
 
 use crate::sender::client as sender;
 use tokio_tungstenite::{
