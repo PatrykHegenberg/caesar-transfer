@@ -2,9 +2,8 @@ use crate::relay::appstate::AppState;
 use crate::relay::server::upload_info;
 use crate::relay::server::ws_handler;
 use axum::{
-    extract::connect_info::ConnectInfo,
     routing::{get, post},
-    Extension, Router,
+    Router,
 };
 use axum_client_ip::SecureClientIpSource;
 use shuttle_axum::ShuttleAxum;
