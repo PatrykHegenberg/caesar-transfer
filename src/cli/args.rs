@@ -184,7 +184,7 @@ impl Args {
                 listen_address,
             }) => {
                 println!("Serve with address '{listen_address:?}' and '{port:?}'");
-                relay::start_ws(port.as_ref(), listen_address.as_ref()).await;
+                relay::server::start_ws(port.as_ref(), listen_address.as_ref()).await;
             }
             // If the user does not specify a command, return early with no error.
             // This is because `command` is an `Option<Commands>`. If the user does
