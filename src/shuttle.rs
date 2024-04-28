@@ -1,4 +1,5 @@
 use crate::relay::appstate::AppState;
+use crate::relay::server::download_info;
 use crate::relay::server::upload_info;
 use crate::relay::server::ws_handler;
 use axum::{
@@ -22,6 +23,7 @@ async fn axum() -> ShuttleAxum {
     let app = Router::new()
         .route("/ws", get(ws_handler))
         .route("/upload", post(upload_info))
+        .route("/download/:name", get(download_info))
         .with_state(appstate)
         .layer(SecureClientIpSource::ConnectInfo.into_extension());
 
