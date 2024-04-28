@@ -2,7 +2,6 @@ pub mod appstate;
 pub mod client;
 pub mod room;
 pub mod server;
-pub mod transfer;
 
 use serde::{Deserialize, Serialize};
 

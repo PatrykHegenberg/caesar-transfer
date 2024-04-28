@@ -16,15 +16,13 @@
 /// and running the application. If the server fails to bind to the specified
 /// host and port, it logs an error and exits.
 use axum::{
-    extract::{ws::WebSocket, Json, Path, State, WebSocketUpgrade},
-    http::StatusCode,
+    extract::{ws::WebSocket, State, WebSocketUpgrade},
     response::IntoResponse,
-    routing::{get, post},
+    routing::get,
     Router,
 };
 
 use futures_util::StreamExt;
-use serde_json::json;
 use std::{env, net::SocketAddr, sync::Arc};
 use tokio::{
     net::TcpListener,
@@ -36,7 +34,6 @@ use tracing::{debug, error, info, warn};
 
 use crate::relay::appstate::AppState;
 use crate::relay::client::Client;
-use crate::relay::transfer::Transfer;
 
 /// This function starts the WebSocket server.
 ///
@@ -98,9 +95,6 @@ pub async fn start_ws(port: Option<&i32>, listen_addr: Option<&String>) {
     // Set up the application routes.
     let app = Router::new()
         .route("/ws", get(ws_handler))
-        .route("/upload", post(upload_info))
-        .route("/download/:name", get(download_info))
-        .route("/download_success/:name", post(download_success))
         .with_state(server)
         .layer(
             TraceLayer::new_for_http()
@@ -276,79 +270,5 @@ async fn shutdown_signal() {
         // If the terminate signal handler resolves, drop the value and do
         // nothing else.
         _ = terminate => {},
-    }
-}
-
-pub async fn upload_info(
-    State(shared_state): State<Arc<RwLock<AppState>>>,
-    // ConnectInfo(addr): ConnectInfo<SocketAddr>,
-    Json(payload): Json<Transfer>,
-) -> impl IntoResponse {
-    // debug!("Got upload request from {}", addr.ip().to_string());
-    let mut data = shared_state.write().await;
-    let t_request = Transfer {
-        name: payload.name,
-        ip: payload.ip,
-        room_id: payload.room_id,
-    };
-    data.transfers.push(t_request.clone());
-
-    debug!("New TransferRequest created");
-    debug!("Actual AppState is {:#?}", *data);
-
-    (StatusCode::CREATED, Json(t_request))
-}
-
-pub async fn download_info(
-    State(shared_state): State<Arc<RwLock<AppState>>>,
-    Path(name): Path<String>,
-) -> impl IntoResponse {
-    let data = shared_state.write().await;
-    match data.transfers.iter().find(|request| request.name == name) {
-        Some(request) => {
-            debug!("Found transfer name.");
-            (StatusCode::OK, Json(request.clone()))
-        }
-        None => {
-            warn!("couldn't find transfer-name: {}", name);
-            (
-                StatusCode::NOT_FOUND,
-                Json(Transfer {
-                    name: String::from(""),
-                    ip: String::from(""),
-                    room_id: String::from(""),
-                }),
-            )
-        }
-    }
-}
-
-pub async fn download_success(
-    State(shared_state): State<Arc<RwLock<AppState>>>,
-    Path(name): Path<String>,
-) -> impl IntoResponse {
-    let mut data = shared_state.write().await;
-    if let Some(index) = data
-        .transfers
-        .iter()
-        .position(|request| request.name == name)
-    {
-        debug!("Found Transfer by name '{name}'");
-        data.transfers.remove(index);
-        debug!("Transfer deleted");
-        (
-            StatusCode::OK,
-            Json(json!({
-                "message": "transfer deleted"
-            })),
-        )
-    } else {
-        warn!("couldn't find transfer-name: {}", name);
-        (
-            StatusCode::NOT_FOUND,
-            Json(json!({
-                "message": "transfer not found"
-            })),
-        )
     }
 }

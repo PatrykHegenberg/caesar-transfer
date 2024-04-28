@@ -1,5 +1,3 @@
-use crate::sender::http_client::send_info;
-use crate::sender::util::{generate_random_name, hash_random_name};
 use crate::shared::{
     packets::{
         list_packet, packet::Value, ChunkPacket, HandshakePacket, HandshakeResponsePacket,
@@ -123,11 +121,6 @@ fn on_create_room(context: &Context, id: String) -> Status {
     let base64 = general_purpose::STANDARD.encode(&context.hmac);
     let url = format!("{}-{}", id, base64);
 
-    let rand_name = generate_random_name();
-    let hash_name = hash_random_name(rand_name.clone());
-
-    let res = send_info("http://localhost:8000", &hash_name, url.as_str());
-    debug!("Got Result: {:#?}", res);
     // Print a newline to the console to separate the output from the command
     // line.
     println!();
@@ -144,7 +137,6 @@ fn on_create_room(context: &Context, id: String) -> Status {
 
     // Print a message to the console with the URL.
     println!("Created room: {}", url);
-    println!("Transfername is: {}", rand_name);
 
     // Continue the event loop.
     Status::Continue()
