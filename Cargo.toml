@@ -47,6 +47,8 @@ tower = { version = "0.4", features = ["util"] }
 shuttle-axum = { version = "0.44.0" }
 shuttle-runtime = { version = "0.44.0" }
 dotenvy = "0.15.7"
+hex = "0.4.3"
+reqwest = { version = "0.12.4", features = ["json", "blocking"] }
 
 [build-dependencies]
 prost-build = "0.12.4"
