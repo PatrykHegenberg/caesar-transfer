@@ -491,6 +491,5 @@ impl Client {
 // TODO: Add tests
 #[cfg(test)]
 mod tests {
-    use super::*;
-
+    // use super::*;
 }
