@@ -2,7 +2,7 @@ use axum::extract::ws::Message;
 use futures_util::{future::join_all, stream::SplitSink, SinkExt};
 use std::{sync::Arc, vec};
 use tokio::{sync::Mutex, sync::RwLock};
-use tracing::error;
+use tracing::{debug, error};
 
 use crate::relay::appstate::AppState;
 use crate::relay::room::Room;
@@ -156,7 +156,7 @@ impl Client {
     /// thread can access the server's state at a time. This is because the
     /// server's state is not thread-safe, and accessing it from multiple
     /// threads could result in undefined behavior.
-    async fn handle_create_room(&mut self, server: &RwLock<AppState>) {
+    async fn handle_create_room(&mut self, server: &RwLock<AppState>, id: Option<String>) {
         let mut server = server.write().await;
 
         // If the current client is already in a room, do nothing.
@@ -170,7 +170,10 @@ impl Client {
 
         // Generate a new room identifier.
         let size = Room::DEFAULT_ROOM_SIZE;
-        let room_id = Uuid::new_v4().to_string();
+        let room_id = match id {
+            Some(id) => id,
+            None => Uuid::new_v4().to_string(),
+        };
 
         // If there is already a room with the same identifier, send an error
         // packet to the client and return.
@@ -199,6 +202,7 @@ impl Client {
 
         // Send a CreateRoom response packet to the client with the room's
         // identifier.
+        debug!("Room created");
         self.send_packet(self.sender.clone(), ResponsePacket::Create { id: room_id })
             .await
     }
@@ -401,7 +405,7 @@ impl Client {
                     Err(_) => return,
                 };
                 match packet {
-                    RequestPacket::Create => self.handle_create_room(server).await,
+                    RequestPacket::Create { id } => self.handle_create_room(server, id).await,
                     RequestPacket::Join { id } => self.handle_join_room(server, id).await,
                     RequestPacket::Leave => self.handle_leave_room(server).await,
                 }

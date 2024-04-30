@@ -48,20 +48,25 @@ use tokio_tungstenite::{
     tungstenite::{client::IntoClientRequest, http::HeaderValue},
 };
 use tracing::{debug, error};
+use uuid::Uuid;
 
 pub async fn start_sender(relay: &str, files: &[String]) {
-    match relay.into_client_request() {
+    debug!("Got relay: {relay}");
+    let url = String::from("ws://") + relay + "/ws";
+    match url.clone().into_client_request() {
         Ok(mut request) => {
             request
                 .headers_mut()
                 .insert("Origin", HeaderValue::from_str(relay).unwrap());
 
-            debug!("Attempting to connect to {relay}...");
+            debug!("Attempting to connect to {url}...");
+            let room_id = Uuid::new_v4().to_string();
 
             match connect_async(request).await {
                 Ok((socket, _)) => {
                     let paths = files.to_vec();
-                    sender::start(socket, paths).await;
+                    sender::start(socket, paths, Some(room_id), relay.to_string()).await;
+                    // sender::start(socket, paths).await;
                 }
                 Err(e) => {
                     error!("Error: Failed to connect with error: {e}");

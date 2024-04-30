@@ -9,7 +9,7 @@ use crate::relay::transfer::Transfer;
 /// The rooms are stored in a `HashMap` with the room ID as the key and the
 /// room as the value. This means that looking up a room by its ID is an O(1)
 /// operation, which is very fast.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AppState {
     pub rooms: HashMap<String, Room>,
     pub transfers: Vec<Transfer>,

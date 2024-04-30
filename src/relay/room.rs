@@ -1,4 +1,4 @@
-use axum::extract::ws::Message;
+use axum::extract::ws::{Message, WebSocket};
 use futures_util::stream::SplitSink;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -24,7 +24,7 @@ use tokio::sync::Mutex;
 //
 // The type alias is used so that the type is not mentioned every time it is
 // used. This makes the code easier to read and understand.
-type Sender = Arc<Mutex<SplitSink<axum::extract::ws::WebSocket, Message>>>;
+type Sender = Arc<Mutex<SplitSink<WebSocket, Message>>>;
 
 /// A `Room` is a collection of clients that are connected to each other.
 ///
@@ -41,7 +41,7 @@ type Sender = Arc<Mutex<SplitSink<axum::extract::ws::WebSocket, Message>>>;
 /// When a room reaches its maximum size, no more clients can join the room.
 /// This is used to prevent rooms from getting too full and causing the
 /// server to run out of memory.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Room {
     pub senders: Vec<Sender>,
     pub size: usize,

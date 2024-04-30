@@ -22,7 +22,9 @@ pub enum RequestPacket {
         // The ID of the room that the client wants to join.
         id: String,
     },
-    Create,
+    Create {
+        id: Option<String>,
+    },
     Leave,
 }
 

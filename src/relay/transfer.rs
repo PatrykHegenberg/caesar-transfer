@@ -27,7 +27,7 @@ mod tests {
             Transfer::new(
                 "Test".to_string(),
                 "127.0.0.1".to_string(),
-                "This_is_a_test_room_id".to_string()
+                "This_is_a_test_room_id".to_string(),
             ),
             transfer
         )

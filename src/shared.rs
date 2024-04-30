@@ -31,7 +31,8 @@ pub enum JsonPacket {
         id: String,
     },
     /// Sent from the client to ask to create a new room.
-    Create,
+    Create { id: Option<String> },
+    // Create,
     /// Sent from the client to ask to leave the current room.
     Leave,
 }
