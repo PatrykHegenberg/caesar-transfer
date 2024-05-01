@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use tracing::{debug, error};
 
 use local_ip_address::{local_ip, local_ipv6};
@@ -55,5 +54,5 @@ pub async fn send_info(
     })
     .await?;
 
-    Ok(result?)
+    result
 }

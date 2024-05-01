@@ -110,13 +110,6 @@ struct Context {
     task: Option<JoinHandle<()>>,
 }
 
-impl Context {
-    async fn clean_up(&mut self) {
-        if let Some(task) = &self.task {
-            task.abort();
-        }
-    }
-}
 /// This function is called when the client receives a create room packet
 /// from the server. The function is responsible for printing a URL to the
 /// console that the user can use to join the room.

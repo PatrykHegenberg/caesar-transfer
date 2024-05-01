@@ -29,7 +29,7 @@ fn nouns2() -> &'static [&'static str] {
 
 pub fn hash_random_name(name: String) -> String {
     let hashed_name = Sha256::digest(name.as_bytes());
-    return hex::encode(hashed_name);
+    hex::encode(hashed_name)
 }
 
 #[cfg(test)]
