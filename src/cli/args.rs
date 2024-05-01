@@ -2,7 +2,7 @@ use crate::receiver;
 use crate::relay;
 use crate::sender;
 use clap::{Parser, Subcommand};
-use std::env;
+use std::{env, sync::Arc};
 use tracing::debug;
 
 /// This struct defines the CLI arguments and subcommands for the caesar command line application.
@@ -147,15 +147,16 @@ impl Args {
             // `sender` module with the list of files that the user wants to
             // send.
             Some(Commands::Send { relay, files }) => {
-                sender::start_sender(
-                    relay.as_deref().unwrap_or(
-                        env::var("APP_ORIGIN")
-                            .unwrap_or("wss://caesar-transfer-iu.shuttleapp.rs/ws".to_string())
-                            .as_str(),
-                    ),
-                    files,
-                )
-                .await;
+                let relay_string: String = relay
+                    .as_deref()
+                    .unwrap_or(
+                        &env::var("APP_ORIGIN")
+                            .unwrap_or("wss://caesar-transfer-iu.shuttleapp.rs/ws".to_string()),
+                    )
+                    .to_string();
+                let relay_arc = Arc::new(relay_string);
+                let files_arc = Arc::new(files.to_vec());
+                sender::start_sender(relay_arc, files_arc).await;
             }
             // If the user wants to receive files, call `start_receiver()` in the
             // `receiver` module with the name of the transfer that the user

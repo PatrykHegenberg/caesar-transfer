@@ -42,31 +42,101 @@ pub mod client;
 pub mod http_client;
 pub mod util;
 
-use crate::sender::client as sender;
+use std::{net::SocketAddr, sync::Arc};
+
+use crate::{
+    relay::{appstate::AppState, server::ws_handler},
+    sender::client as sender,
+};
+use axum::{routing::get, Router};
+use tokio::{net::TcpListener, task};
 use tokio_tungstenite::{
     connect_async,
     tungstenite::{client::IntoClientRequest, http::HeaderValue},
 };
-use tracing::{debug, error};
+use tower_http::trace::{DefaultMakeSpan, TraceLayer};
+use tracing::{debug, error, info};
 use uuid::Uuid;
 
-pub async fn start_sender(relay: &str, files: &[String]) {
+pub async fn start_sender(relay: Arc<String>, files: Arc<Vec<String>>) {
     debug!("Got relay: {relay}");
-    let url = String::from("ws://") + relay + "/ws";
+    let room_id = Uuid::new_v4().to_string();
+    let local_room_id = room_id.clone();
+    let local_files = files.clone();
+    let local_ws_thread = task::spawn(async move {
+        start_local_ws().await;
+    });
+    let relay_thread =
+        task::spawn(
+            async move { connect_to_relay(relay.clone(), files.clone(), Some(room_id)).await },
+        );
+    let local_thread = task::spawn(async move {
+        connect_to_relay(
+            Arc::new(String::from("0.0.0.0:9000")),
+            local_files.clone(),
+            Some(local_room_id),
+        )
+        .await
+    });
+
+    local_ws_thread.await.unwrap();
+    relay_thread.await.unwrap();
+    local_thread.await.unwrap();
+}
+
+pub async fn start_local_ws() {
+    let app_host = "0.0.0.0";
+    let app_port = "9000";
+
+    // Create a new server data structure.
+    let server = AppState::new();
+
+    // Set up the application routes.
+    let app = Router::new()
+        .route("/ws", get(ws_handler))
+        .with_state(server)
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(DefaultMakeSpan::default().include_headers(true)),
+        );
+
+    if let Ok(listener) = TcpListener::bind(&format!("{}:{}", app_host, app_port)).await {
+        info!(
+            "Local Websocket listening on: {}",
+            listener.local_addr().unwrap()
+        );
+
+        // Run the server.
+        axum::serve(
+            listener,
+            app.into_make_service_with_connect_info::<SocketAddr>(),
+        )
+        .await
+        .unwrap();
+    } else {
+        // Log binding failure and exit.
+        error!("Failed to listen on: {}:{}", app_host, app_port);
+    }
+}
+
+async fn connect_to_relay(relay: Arc<String>, files: Arc<Vec<String>>, room_id: Option<String>) {
+    let url = format!("ws://{}/ws", relay);
     match url.clone().into_client_request() {
         Ok(mut request) => {
             request
                 .headers_mut()
-                .insert("Origin", HeaderValue::from_str(relay).unwrap());
+                .insert("Origin", HeaderValue::from_str(relay.as_ref()).unwrap());
 
             debug!("Attempting to connect to {url}...");
-            let room_id = Uuid::new_v4().to_string();
+            let room_id = match room_id {
+                Some(id) => id,
+                None => Uuid::new_v4().to_string(),
+            };
 
             match connect_async(request).await {
                 Ok((socket, _)) => {
                     let paths = files.to_vec();
                     sender::start(socket, paths, Some(room_id), relay.to_string()).await;
-                    // sender::start(socket, paths).await;
                 }
                 Err(e) => {
                     error!("Error: Failed to connect with error: {e}");
