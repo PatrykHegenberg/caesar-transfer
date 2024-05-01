@@ -51,12 +51,19 @@ pub async fn start_receiver(relay: &str, name: &str) {
     debug!("Got room_id from Server: {:?}", res);
     let res_ip = res.ip + ":9000";
 
-    if let Err(e) = start_ws_com(res_ip.as_str(), res.local_room_id.as_str()).await {
-        debug!("Failed to connect local with first room_id: {e}");
-        if let Err(e) = start_ws_com(relay, res.relay_room_id.as_str()).await {
-            debug!("Failed to connect remote with first room_id: {e}");
+    if let Err(local_err) = start_ws_com(res_ip.as_str(), res.local_room_id.as_str()).await {
+        debug!("Failed to connect local: {local_err}");
+        if let Err(relay_err) = start_ws_com(relay, res.relay_room_id.as_str()).await {
+            debug!("Failed to connect remote: {relay_err}");
         }
     }
+
+    // if let Err(e) = start_ws_com(res_ip.as_str(), res.local_room_id.as_str()).await {
+    //     debug!("Failed to connect local with first room_id: {e}");
+    //     if let Err(e) = start_ws_com(relay, res.relay_room_id.as_str()).await {
+    //         debug!("Failed to connect remote with first room_id: {e}");
+    //     }
+    // }
 }
 
 pub async fn start_ws_com(relay: &str, name: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -74,9 +81,21 @@ pub async fn start_ws_com(relay: &str, name: &str) -> Result<(), Box<dyn std::er
 
     println!("Attempting to connect...");
 
-    match connect_async(request).await {
-        Ok((socket, _)) => receiver::start(socket, name).await,
-        Err(e) => error!("Error: Failed to connect: {e:?}"),
+    let _ = match tokio::time::timeout(std::time::Duration::from_secs(5), connect_async(request))
+        .await
+    {
+        Ok(Ok((socket, _))) => {
+            receiver::start(socket, name).await;
+            Ok(())
+        }
+        Ok(Err(e)) => {
+            error!("Error: Failed to connect: {e:?}");
+            Err(Box::new(e))
+        }
+        Err(e) => {
+            error!("Error: Timeout reached for local connection attempt");
+            Err(Box::new(e))
+        }?,
     };
     // The start function is defined in the
     // receiver::client module and is the function that interacts with
