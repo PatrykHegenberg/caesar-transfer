@@ -49,7 +49,7 @@ use crate::{
     sender::{client as sender, util::generate_random_name},
 };
 use axum::{routing::get, Router};
-use tokio::{net::TcpListener, task};
+use tokio::{net::TcpListener, sync::mpsc, task};
 use tokio_tungstenite::{
     connect_async,
     tungstenite::{client::IntoClientRequest, http::HeaderValue},
@@ -59,6 +59,7 @@ use tracing::{debug, error, info};
 use uuid::Uuid;
 
 pub async fn start_sender(relay: Arc<String>, files: Arc<Vec<String>>) {
+    let (tx, mut rx) = mpsc::channel(1);
     debug!("Got relay: {relay}");
     let room_id = Uuid::new_v4().to_string();
     let rand_name = generate_random_name();
@@ -66,6 +67,7 @@ pub async fn start_sender(relay: Arc<String>, files: Arc<Vec<String>>) {
     let local_files = files.clone();
     let local_relay = relay.clone();
     let local_rand_name = rand_name.clone();
+    let local_tx = tx.clone();
     let local_ws_thread = task::spawn(async move {
         start_local_ws().await;
     });
@@ -76,6 +78,7 @@ pub async fn start_sender(relay: Arc<String>, files: Arc<Vec<String>>) {
             Some(room_id),
             relay.clone(),
             Arc::new(rand_name.clone()),
+            tx.clone(),
         )
         .await
     });
@@ -86,13 +89,15 @@ pub async fn start_sender(relay: Arc<String>, files: Arc<Vec<String>>) {
             Some(local_room_id),
             local_relay.clone(),
             Arc::new(local_rand_name.clone()),
+            local_tx.clone(),
         )
         .await
     });
 
-    local_ws_thread.await.unwrap();
-    relay_thread.await.unwrap();
-    local_thread.await.unwrap();
+    rx.recv().await.unwrap();
+    local_ws_thread.abort();
+    relay_thread.abort();
+    local_thread.abort();
 }
 
 pub async fn start_local_ws() {
@@ -136,6 +141,7 @@ async fn connect_to_server(
     room_id: Option<String>,
     message_server: Arc<String>,
     transfer_name: Arc<String>,
+    tx: mpsc::Sender<()>,
 ) {
     let url = format!("ws://{}/ws", relay);
     let message_relay = format!("{}", message_server);
@@ -163,6 +169,7 @@ async fn connect_to_server(
                         transfer_name.clone(),
                     )
                     .await;
+                    tx.send(()).await.unwrap();
                 }
                 Err(e) => {
                     error!("Error: Failed to connect with error: {e}");
