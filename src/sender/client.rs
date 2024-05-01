@@ -1,5 +1,5 @@
 use crate::sender::http_client::send_info;
-use crate::sender::util::{generate_random_name, hash_random_name};
+use crate::sender::util::hash_random_name;
 use crate::shared::{
     packets::{
         list_packet, packet::Value, ChunkPacket, HandshakePacket, HandshakeResponsePacket,
@@ -126,7 +126,13 @@ impl Context {
 /// appended to the room id to create a URL. The URL is then printed to the
 /// console using the qr2term library. Finally, the function prints a
 /// message to the console with the URL.
-fn on_create_room(context: &Context, id: String, relay: String, transfer_name: String) -> Status {
+fn on_create_room(
+    context: &Context,
+    id: String,
+    relay: String,
+    transfer_name: String,
+    is_local: bool,
+) -> Status {
     debug!("Creating room on: {relay}");
     let base64 = general_purpose::STANDARD.encode(&context.hmac);
     let url = format!("{}-{}", id, base64);
@@ -142,7 +148,7 @@ fn on_create_room(context: &Context, id: String, relay: String, transfer_name: S
             .enable_all()
             .build()
             .unwrap()
-            .block_on(send_info(&server_url, &h_name, send_url.as_str()))
+            .block_on(send_info(&server_url, &h_name, send_url.as_str(), is_local))
     })
     .join()
     .unwrap();
@@ -562,13 +568,16 @@ fn on_message(
     message: WebSocketMessage,
     relay: String,
     transfer_name: String,
+    is_local: bool,
 ) -> Status {
     if message.is_text() {
         let text = message.into_text().unwrap();
         let packet = serde_json::from_str(&text).unwrap();
 
         return match packet {
-            JsonPacketResponse::Create { id } => on_create_room(context, id, relay, transfer_name),
+            JsonPacketResponse::Create { id } => {
+                on_create_room(context, id, relay, transfer_name, is_local)
+            }
             JsonPacketResponse::Join { size } => on_join_room(context, size),
             JsonPacketResponse::Leave { index } => on_leave_room(context, index),
             JsonPacketResponse::Error { message } => on_error(message),
@@ -621,6 +630,7 @@ pub async fn start(
     room_id: Option<String>,
     relay: String,
     transfer_name: String,
+    is_local: bool,
 ) {
     // Create a vector to store metadata about each file that will be sent.
     let mut files = vec![];
@@ -715,7 +725,13 @@ pub async fn start(
     // client.
     let incoming_handler = incoming.try_for_each(|message| {
         // Call the `on_message` function to handle the incoming message.
-        match on_message(&mut context, message, relay.clone(), transfer_name.clone()) {
+        match on_message(
+            &mut context,
+            message,
+            relay.clone(),
+            transfer_name.clone(),
+            is_local,
+        ) {
             // If the status is `Status::Exit`, the transfer is complete. Print a message to
             // stdout and exit the function.
             Status::Exit() => {
@@ -839,7 +855,8 @@ mod tests {
                 "b531e87d-e51a-4507-94f4-335cbe2d32f3-Nc5skZReq7qJN7INwckyAZLWEEbxsrFfH/692tUNgkM="
                     .to_string(),
                 String::from("0.0.0.0:8000"),
-                String::from("Test")
+                String::from("Test"),
+                true,
             ),
             Status::Continue()
         );
@@ -926,11 +943,12 @@ mod tests {
                 &mut context,
                 WebSocketMessage::Text(r#"{"type":"leave","index":5}"#.to_string()),
                 String::from("0.0.0.0:8000"),
-                String::from("Test")
+                String::from("Test"),
+                true,
             ),
             Status::Continue()
         );
-        assert_eq!(on_message(&mut context, WebSocketMessage::Text(r#"{"type":"create","id":"b531e87d-e51a-4507-94f4-335cbe2d32f3-Nc5skZReq7qJN7INwckyAZLWEEbxsrFfH/692tUNgkM="}"#.to_string()), String::from("0.0.0.0:8000"), String::from("Test")), Status::Continue());
+        assert_eq!(on_message(&mut context, WebSocketMessage::Text(r#"{"type":"create","id":"b531e87d-e51a-4507-94f4-335cbe2d32f3-Nc5skZReq7qJN7INwckyAZLWEEbxsrFfH/692tUNgkM="}"#.to_string()), String::from("0.0.0.0:8000"), String::from("Test"), true), Status::Continue());
         assert_eq!(
             on_message(
                 &mut context,
@@ -938,7 +956,8 @@ mod tests {
                     r#"{"type":"error","message":"Error Message: Test"}"#.to_string()
                 ),
                 String::from("0.0.0.0:8000"),
-                String::from("Test")
+                String::from("Test"),
+                true
             ),
             Status::Err("Error Message: Test".to_string())
         );

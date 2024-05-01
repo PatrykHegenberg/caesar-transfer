@@ -51,16 +51,10 @@ pub async fn start_receiver(relay: &str, name: &str) {
     debug!("Got room_id from Server: {:?}", res);
     let res_ip = res.ip + ":9000";
 
-    if let Err(e) = start_ws_com(res_ip.as_str(), res.room_id[0].as_str()).await {
+    if let Err(e) = start_ws_com(res_ip.as_str(), res.local_room_id.as_str()).await {
         debug!("Failed to connect local with first room_id: {e}");
-        if let Err(e) = start_ws_com(res_ip.as_str(), res.room_id[1].as_str()).await {
-            debug!("Failed to connect local with second room_id: {e}");
-            if let Err(e) = start_ws_com(relay, res.room_id[0].as_str()).await {
-                debug!("Failed to connect remote with first room_id: {e}");
-                if let Err(e) = start_ws_com(relay, res.room_id[1].as_str()).await {
-                    error!("Failed to accomplish transfer with error: {e}");
-                }
-            }
+        if let Err(e) = start_ws_com(relay, res.relay_room_id.as_str()).await {
+            debug!("Failed to connect remote with first room_id: {e}");
         }
     }
 }

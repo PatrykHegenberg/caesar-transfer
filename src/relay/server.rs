@@ -292,17 +292,34 @@ pub async fn upload_info(
         .find(|request| request.name == payload.name)
     {
         Some(request) => {
-            request.room_id.push(payload.room_id);
-            debug!("Found Transfer and updated");
-            (StatusCode::OK, Json(request.clone()))
+            debug!("Found Transfer");
+            debug!("Request is: {:?}", request);
+            if request.relay_room_id.is_empty() {
+                request.relay_room_id = payload.relay_room_id;
+                debug!("Found Transfer and updated");
+                debug!("request is: {:#?}", request);
+                (StatusCode::OK, Json(request.clone()))
+            } else {
+                request.local_room_id = payload.local_room_id;
+                debug!("Found Transfer and updated");
+                debug!("request is: {:#?}", request);
+                (StatusCode::OK, Json(request.clone()))
+            }
         }
         None => {
-            let mut t_request = TransferResponse {
+            let mut local = String::from("");
+            let mut relay = String::from("");
+            if payload.relay_room_id.is_empty() {
+                local = payload.local_room_id;
+            } else {
+                relay = payload.relay_room_id;
+            }
+            let t_request = TransferResponse {
                 name: payload.name,
                 ip: payload.ip,
-                room_id: Vec::new(),
+                local_room_id: local,
+                relay_room_id: relay,
             };
-            t_request.room_id.push(payload.room_id);
             data.transfers.push(t_request.clone());
 
             debug!("New TransferRequest created");
@@ -330,7 +347,8 @@ pub async fn download_info(
                 Json(TransferResponse {
                     name: String::from(""),
                     ip: String::from(""),
-                    room_id: vec![String::from("")],
+                    local_room_id: String::from(""),
+                    relay_room_id: String::from(""),
                 }),
             )
         }

@@ -79,6 +79,7 @@ pub async fn start_sender(relay: Arc<String>, files: Arc<Vec<String>>) {
             relay.clone(),
             Arc::new(rand_name.clone()),
             tx.clone(),
+            false,
         )
         .await
     });
@@ -90,6 +91,7 @@ pub async fn start_sender(relay: Arc<String>, files: Arc<Vec<String>>) {
             local_relay.clone(),
             Arc::new(local_rand_name.clone()),
             local_tx.clone(),
+            true,
         )
         .await
     });
@@ -142,6 +144,7 @@ async fn connect_to_server(
     message_server: Arc<String>,
     transfer_name: Arc<String>,
     tx: mpsc::Sender<()>,
+    is_local: bool,
 ) {
     let url = format!("ws://{}/ws", relay);
     let message_relay = format!("{}", message_server);
@@ -167,6 +170,7 @@ async fn connect_to_server(
                         Some(room_id),
                         message_relay.to_string(),
                         transfer_name.clone(),
+                        is_local,
                     )
                     .await;
                     tx.send(()).await.unwrap();

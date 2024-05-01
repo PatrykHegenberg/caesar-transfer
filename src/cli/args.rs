@@ -3,7 +3,6 @@ use crate::relay;
 use crate::sender;
 use clap::{Parser, Subcommand};
 use std::{env, sync::Arc};
-use tokio::sync::mpsc;
 use tracing::debug;
 
 /// This struct defines the CLI arguments and subcommands for the caesar command line application.

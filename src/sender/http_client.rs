@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use tracing::error;
+use tracing::{debug, error};
 
 use local_ip_address::{local_ip, local_ipv6};
 use reqwest::blocking::Client;
@@ -7,7 +7,7 @@ use tokio::task;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
-pub async fn send_info(relay: &str, name: &str, room_id: &str) -> Result<String> {
+pub async fn send_info(relay: &str, name: &str, room_id: &str, is_local: bool) -> Result<String> {
     let url = relay.to_string();
     let sender_ip = match local_ipv6() {
         Ok(ip) => ip,
@@ -24,11 +24,18 @@ pub async fn send_info(relay: &str, name: &str, room_id: &str) -> Result<String>
         let mut map = HashMap::new();
         map.insert("name", String::from(name));
         map.insert("ip", ip_str);
-        map.insert("room_id", String::from(room_id));
+        if is_local {
+            map.insert("local_room_id", String::from(room_id));
+            map.insert("relay_room_id", String::from(""));
+        } else {
+            map.insert("relay_room_id", String::from(room_id));
+            map.insert("local_room_id", String::from(""));
+        }
         map
     };
     let room_id = room_id.to_string();
 
+    debug!("Trying to send Request.");
     let result: Result<String> = task::spawn_blocking(move || {
         let client = Client::new();
         client
