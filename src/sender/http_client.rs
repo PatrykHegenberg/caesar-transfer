@@ -5,9 +5,16 @@ use local_ip_address::{local_ip, local_ipv6};
 use reqwest::blocking::Client;
 use tokio::task;
 
+use crate::relay::transfer::{TransferRequest, TransferResponse};
+
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
-pub async fn send_info(relay: &str, name: &str, room_id: &str, is_local: bool) -> Result<String> {
+pub async fn send_info(
+    relay: &str,
+    name: &str,
+    room_id: &str,
+    is_local: bool,
+) -> Result<TransferResponse> {
     let url = relay.to_string();
     let sender_ip = match local_ipv6() {
         Ok(ip) => ip,
@@ -20,31 +27,31 @@ pub async fn send_info(relay: &str, name: &str, room_id: &str, is_local: bool) -
         },
     };
     let ip_str = sender_ip.to_owned().to_string();
-    let map = {
-        let mut map = HashMap::new();
-        map.insert("name", String::from(name));
-        map.insert("ip", ip_str);
-        if is_local {
-            map.insert("local_room_id", String::from(room_id));
-            map.insert("relay_room_id", String::from(""));
+
+    let transfer_request = TransferRequest {
+        name: String::from(name),
+        ip: ip_str,
+        local_room_id: if is_local {
+            String::from(room_id)
         } else {
-            map.insert("relay_room_id", String::from(room_id));
-            map.insert("local_room_id", String::from(""));
-        }
-        map
+            String::from("")
+        },
+        relay_room_id: if !is_local {
+            String::from(room_id)
+        } else {
+            String::from("")
+        },
     };
-    let room_id = room_id.to_string();
 
     debug!("Trying to send Request.");
-    let result: Result<String> = task::spawn_blocking(move || {
+    let result: Result<TransferResponse> = task::spawn_blocking(move || {
         let client = Client::new();
-        client
+        let response = client
             .put(format!("{}/upload", url))
-            .json(&map)
+            .json(&transfer_request)
             .send()?
-            .text()?
-            .to_string();
-        Ok(room_id)
+            .json()?;
+        Ok(response)
     })
     .await?;
 

@@ -155,24 +155,35 @@ fn on_create_room(
     debug!("Got Result: {:?}", res);
     // Print a newline to the console to separate the output from the command
     // line.
-    println!();
+    match res {
+        Ok(transfer_response) => {
+            if !transfer_response.local_room_id.is_empty()
+                && !transfer_response.relay_room_id.is_empty()
+            {
+                println!();
 
-    // Try to generate a QR code from the URL. If the function fails for some
-    // reason, print an error message to the console.
-    // if let Err(error) = qr2term::print_qr(&url) {
-    //     error!("Failed to generate QR code: {}", error);
-    // }
+                // Try to generate a QR code from the URL. If the function fails for some
+                // reason, print an error message to the console.
+                // if let Err(error) = qr2term::print_qr(&url) {
+                //     error!("Failed to generate QR code: {}", error);
+                // }
 
-    if let Err(error) = qr2term::print_qr(&transfer_name) {
-        error!("Failed to generate QR code: {}", error);
+                if let Err(error) = qr2term::print_qr(&transfer_name) {
+                    error!("Failed to generate QR code: {}", error);
+                }
+                // Print a newline to the console to separate the output from the command
+                // line.
+                println!();
+
+                // Print a message to the console with the URL.
+                println!("Created room: {}", url);
+                println!("Transfername is: {}", transfer_name);
+            }
+        }
+        Err(e) => {
+            error!("Error sending info: {e}");
+        }
     }
-    // Print a newline to the console to separate the output from the command
-    // line.
-    println!();
-
-    // Print a message to the console with the URL.
-    println!("Created room: {}", url);
-    println!("Transfername is: {}", transfer_name);
 
     // Continue the event loop.
     Status::Continue()
