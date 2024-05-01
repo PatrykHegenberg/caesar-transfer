@@ -2,7 +2,7 @@ use std::{collections::HashMap, sync::Arc};
 use tokio::sync::RwLock;
 
 use crate::relay::room::Room;
-use crate::relay::transfer::Transfer;
+use crate::relay::transfer::TransferResponse;
 
 /// A struct that holds all of the rooms that the server knows about.
 ///
@@ -12,7 +12,7 @@ use crate::relay::transfer::Transfer;
 #[derive(Debug, Clone)]
 pub struct AppState {
     pub rooms: HashMap<String, Room>,
-    pub transfers: Vec<Transfer>,
+    pub transfers: Vec<TransferResponse>,
 }
 
 impl AppState {

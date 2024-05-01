@@ -46,7 +46,7 @@ use std::{net::SocketAddr, sync::Arc};
 
 use crate::{
     relay::{appstate::AppState, server::ws_handler},
-    sender::client as sender,
+    sender::{client as sender, util::generate_random_name},
 };
 use axum::{routing::get, Router};
 use tokio::{net::TcpListener, task};
@@ -61,20 +61,31 @@ use uuid::Uuid;
 pub async fn start_sender(relay: Arc<String>, files: Arc<Vec<String>>) {
     debug!("Got relay: {relay}");
     let room_id = Uuid::new_v4().to_string();
+    let rand_name = generate_random_name();
     let local_room_id = room_id.clone();
     let local_files = files.clone();
+    let local_relay = relay.clone();
+    let local_rand_name = rand_name.clone();
     let local_ws_thread = task::spawn(async move {
         start_local_ws().await;
     });
-    let relay_thread =
-        task::spawn(
-            async move { connect_to_relay(relay.clone(), files.clone(), Some(room_id)).await },
-        );
+    let relay_thread = task::spawn(async move {
+        connect_to_server(
+            relay.clone(),
+            files.clone(),
+            Some(room_id),
+            relay.clone(),
+            Arc::new(rand_name.clone()),
+        )
+        .await
+    });
     let local_thread = task::spawn(async move {
-        connect_to_relay(
+        connect_to_server(
             Arc::new(String::from("0.0.0.0:9000")),
             local_files.clone(),
             Some(local_room_id),
+            local_relay.clone(),
+            Arc::new(local_rand_name.clone()),
         )
         .await
     });
@@ -119,8 +130,16 @@ pub async fn start_local_ws() {
     }
 }
 
-async fn connect_to_relay(relay: Arc<String>, files: Arc<Vec<String>>, room_id: Option<String>) {
+async fn connect_to_server(
+    relay: Arc<String>,
+    files: Arc<Vec<String>>,
+    room_id: Option<String>,
+    message_server: Arc<String>,
+    transfer_name: Arc<String>,
+) {
     let url = format!("ws://{}/ws", relay);
+    let message_relay = format!("{}", message_server);
+    let transfer_name = format!("{}", transfer_name);
     match url.clone().into_client_request() {
         Ok(mut request) => {
             request
@@ -136,7 +155,14 @@ async fn connect_to_relay(relay: Arc<String>, files: Arc<Vec<String>>, room_id: 
             match connect_async(request).await {
                 Ok((socket, _)) => {
                     let paths = files.to_vec();
-                    sender::start(socket, paths, Some(room_id), relay.to_string()).await;
+                    sender::start(
+                        socket,
+                        paths,
+                        Some(room_id),
+                        message_relay.to_string(),
+                        transfer_name.clone(),
+                    )
+                    .await;
                 }
                 Err(e) => {
                     error!("Error: Failed to connect with error: {e}");

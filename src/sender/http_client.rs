@@ -32,7 +32,7 @@ pub async fn send_info(relay: &str, name: &str, room_id: &str) -> Result<String>
     let result: Result<String> = task::spawn_blocking(move || {
         let client = Client::new();
         client
-            .post(format!("{}/upload", url))
+            .put(format!("{}/upload", url))
             .json(&map)
             .send()?
             .text()?

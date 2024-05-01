@@ -110,6 +110,13 @@ struct Context {
     task: Option<JoinHandle<()>>,
 }
 
+impl Context {
+    async fn clean_up(&mut self) {
+        if let Some(task) = &self.task {
+            task.abort();
+        }
+    }
+}
 /// This function is called when the client receives a create room packet
 /// from the server. The function is responsible for printing a URL to the
 /// console that the user can use to join the room.
@@ -119,12 +126,13 @@ struct Context {
 /// appended to the room id to create a URL. The URL is then printed to the
 /// console using the qr2term library. Finally, the function prints a
 /// message to the console with the URL.
-fn on_create_room(context: &Context, id: String, relay: String) -> Status {
+fn on_create_room(context: &Context, id: String, relay: String, transfer_name: String) -> Status {
+    debug!("Creating room on: {relay}");
     let base64 = general_purpose::STANDARD.encode(&context.hmac);
     let url = format!("{}-{}", id, base64);
 
-    let rand_name = generate_random_name();
-    let hash_name = hash_random_name(rand_name.clone());
+    // let rand_name = generate_random_name();
+    let hash_name = hash_random_name(transfer_name.clone());
 
     let send_url = url.to_string();
     let h_name = hash_name.to_string();
@@ -149,7 +157,7 @@ fn on_create_room(context: &Context, id: String, relay: String) -> Status {
     //     error!("Failed to generate QR code: {}", error);
     // }
 
-    if let Err(error) = qr2term::print_qr(&rand_name) {
+    if let Err(error) = qr2term::print_qr(&transfer_name) {
         error!("Failed to generate QR code: {}", error);
     }
     // Print a newline to the console to separate the output from the command
@@ -158,7 +166,7 @@ fn on_create_room(context: &Context, id: String, relay: String) -> Status {
 
     // Print a message to the console with the URL.
     println!("Created room: {}", url);
-    println!("Transfername is: {}", rand_name);
+    println!("Transfername is: {}", transfer_name);
 
     // Continue the event loop.
     Status::Continue()
@@ -549,13 +557,18 @@ fn on_handshake(context: &mut Context, handshake_response: HandshakeResponsePack
 ///   struct is then matched on to call the appropriate function.
 ///
 /// If the message is invalid, an error is returned.
-fn on_message(context: &mut Context, message: WebSocketMessage, relay: String) -> Status {
+fn on_message(
+    context: &mut Context,
+    message: WebSocketMessage,
+    relay: String,
+    transfer_name: String,
+) -> Status {
     if message.is_text() {
         let text = message.into_text().unwrap();
         let packet = serde_json::from_str(&text).unwrap();
 
         return match packet {
-            JsonPacketResponse::Create { id } => on_create_room(context, id, relay),
+            JsonPacketResponse::Create { id } => on_create_room(context, id, relay, transfer_name),
             JsonPacketResponse::Join { size } => on_join_room(context, size),
             JsonPacketResponse::Leave { index } => on_leave_room(context, index),
             JsonPacketResponse::Error { message } => on_error(message),
@@ -602,7 +615,13 @@ fn on_message(context: &mut Context, message: WebSocketMessage, relay: String) -
 /// When the function is finished, it will exit and the transfer will be complete. If there
 /// is an error during the transfer, the function will print an error message to stdout and
 /// exit.
-pub async fn start(socket: Socket, paths: Vec<String>, room_id: Option<String>, relay: String) {
+pub async fn start(
+    socket: Socket,
+    paths: Vec<String>,
+    room_id: Option<String>,
+    relay: String,
+    transfer_name: String,
+) {
     // Create a vector to store metadata about each file that will be sent.
     let mut files = vec![];
 
@@ -696,7 +715,7 @@ pub async fn start(socket: Socket, paths: Vec<String>, room_id: Option<String>, 
     // client.
     let incoming_handler = incoming.try_for_each(|message| {
         // Call the `on_message` function to handle the incoming message.
-        match on_message(&mut context, message, relay.clone()) {
+        match on_message(&mut context, message, relay.clone(), transfer_name.clone()) {
             // If the status is `Status::Exit`, the transfer is complete. Print a message to
             // stdout and exit the function.
             Status::Exit() => {
@@ -819,7 +838,8 @@ mod tests {
                 &context,
                 "b531e87d-e51a-4507-94f4-335cbe2d32f3-Nc5skZReq7qJN7INwckyAZLWEEbxsrFfH/692tUNgkM="
                     .to_string(),
-                String::from("0.0.0.0:8000")
+                String::from("0.0.0.0:8000"),
+                String::from("Test")
             ),
             Status::Continue()
         );
@@ -905,18 +925,20 @@ mod tests {
             on_message(
                 &mut context,
                 WebSocketMessage::Text(r#"{"type":"leave","index":5}"#.to_string()),
-                String::from("0.0.0.0:8000")
+                String::from("0.0.0.0:8000"),
+                String::from("Test")
             ),
             Status::Continue()
         );
-        assert_eq!(on_message(&mut context, WebSocketMessage::Text(r#"{"type":"create","id":"b531e87d-e51a-4507-94f4-335cbe2d32f3-Nc5skZReq7qJN7INwckyAZLWEEbxsrFfH/692tUNgkM="}"#.to_string()), String::from("0.0.0.0:8000")), Status::Continue());
+        assert_eq!(on_message(&mut context, WebSocketMessage::Text(r#"{"type":"create","id":"b531e87d-e51a-4507-94f4-335cbe2d32f3-Nc5skZReq7qJN7INwckyAZLWEEbxsrFfH/692tUNgkM="}"#.to_string()), String::from("0.0.0.0:8000"), String::from("Test")), Status::Continue());
         assert_eq!(
             on_message(
                 &mut context,
                 WebSocketMessage::Text(
                     r#"{"type":"error","message":"Error Message: Test"}"#.to_string()
                 ),
-                String::from("0.0.0.0:8000")
+                String::from("0.0.0.0:8000"),
+                String::from("Test")
             ),
             Status::Err("Error Message: Test".to_string())
         );

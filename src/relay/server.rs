@@ -19,7 +19,7 @@ use axum::{
     extract::{ws::WebSocket, Json, Path, State, WebSocketUpgrade},
     http::StatusCode,
     response::IntoResponse,
-    routing::{get, post},
+    routing::{get, post, put},
     Router,
 };
 
@@ -34,9 +34,9 @@ use tokio::{
 use tower_http::trace::{DefaultMakeSpan, TraceLayer};
 use tracing::{debug, error, info, warn};
 
-use crate::relay::appstate::AppState;
 use crate::relay::client::Client;
-use crate::relay::transfer::Transfer;
+use crate::relay::transfer::TransferResponse;
+use crate::relay::{appstate::AppState, transfer::TransferRequest};
 
 /// This function starts the WebSocket server.
 ///
@@ -98,7 +98,7 @@ pub async fn start_ws(port: Option<&i32>, listen_addr: Option<&String>) {
     // Set up the application routes.
     let app = Router::new()
         .route("/ws", get(ws_handler))
-        .route("/upload", post(upload_info))
+        .route("/upload", put(upload_info))
         .route("/download/:name", get(download_info))
         .route("/download_success/:name", post(download_success))
         .with_state(server)
@@ -282,21 +282,35 @@ async fn shutdown_signal() {
 pub async fn upload_info(
     State(shared_state): State<Arc<RwLock<AppState>>>,
     // ConnectInfo(addr): ConnectInfo<SocketAddr>,
-    Json(payload): Json<Transfer>,
+    Json(payload): Json<TransferRequest>,
 ) -> impl IntoResponse {
     // debug!("Got upload request from {}", addr.ip().to_string());
     let mut data = shared_state.write().await;
-    let t_request = Transfer {
-        name: payload.name,
-        ip: payload.ip,
-        room_id: payload.room_id,
-    };
-    data.transfers.push(t_request.clone());
+    match data
+        .transfers
+        .iter_mut()
+        .find(|request| request.name == payload.name)
+    {
+        Some(request) => {
+            request.room_id.push(payload.room_id);
+            debug!("Found Transfer and updated");
+            (StatusCode::OK, Json(request.clone()))
+        }
+        None => {
+            let mut t_request = TransferResponse {
+                name: payload.name,
+                ip: payload.ip,
+                room_id: Vec::new(),
+            };
+            t_request.room_id.push(payload.room_id);
+            data.transfers.push(t_request.clone());
 
-    debug!("New TransferRequest created");
-    debug!("Actual AppState is {:#?}", *data);
+            debug!("New TransferRequest created");
+            debug!("Actual AppState is {:#?}", *data);
 
-    (StatusCode::CREATED, Json(t_request))
+            (StatusCode::CREATED, Json(t_request))
+        }
+    }
 }
 
 pub async fn download_info(
@@ -313,10 +327,10 @@ pub async fn download_info(
             warn!("couldn't find transfer-name: {}", name);
             (
                 StatusCode::NOT_FOUND,
-                Json(Transfer {
+                Json(TransferResponse {
                     name: String::from(""),
                     ip: String::from(""),
-                    room_id: String::from(""),
+                    room_id: vec![String::from("")],
                 }),
             )
         }
