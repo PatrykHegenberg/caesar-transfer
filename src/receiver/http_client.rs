@@ -1,5 +1,5 @@
 use hex;
-use reqwest;
+use reqwest::{self, Client};
 use sha2::{Digest, Sha256};
 use tracing::error;
 
@@ -22,4 +22,17 @@ pub async fn download_info(relay: &str, name: &str) -> Result<TransferResponse> 
             Err(Box::new(err))
         }
     }
+}
+
+pub async fn download_success(relay: &str, name: &str) -> Result<()> {
+    let url = String::from("http://") + relay;
+    let hashed_name = Sha256::digest(name.as_bytes());
+    let hashed_string = hex::encode(hashed_name);
+
+    let client = Client::new();
+    let _ = client
+        .post(format!("{}/download_success/{}", url, hashed_string))
+        .send()
+        .await?;
+    Ok(())
 }
