@@ -3,7 +3,7 @@ name: Build and Publish
 on:
   push:
     tags:
-      - '*'
+      - "*"
 
 jobs:
   publish:
@@ -14,66 +14,67 @@ jobs:
         include:
           - name: Windows
             os: windows-latest
-            artifact_name: target/release/caesar.exe
-            asset_name: caesar-windows
+            artifact_name: caesar.exe
+            asset_name: caesar-windows.exe
           - name: MacOS
             os: macos-latest
-            artifact_name: target/release/caesar
+            artifact_name: caesar
             asset_name: caesar-macos
           - name: Linux
             os: ubuntu-latest
-            artifact_name: target/release/caesar
+            artifact_name: caesar
             asset_name: caesar-linux
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Install deps on MacOS
-      if: matrix.os == 'macos-latest'
-      run: brew install protobuf
+      - name: Install deps on MacOS
+        if: matrix.os == 'macos-latest'
+        run: brew install protobuf
 
-    - name: Install deps on Windows
-      if: matrix.os == 'windows-latest'
-      run: choco install protobuf
+      - name: Install deps on Windows
+        if: matrix.os == 'windows-latest'
+        run: choco install protobuf
 
-    - name: Install deps on Linux
-      if: matrix.os == 'ubuntu-latest'
-      run: sudo apt-get -y install protobuf-compiler
+      - name: Install deps on Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get -y install protobuf-compiler
 
-    - uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        profile: minimal
-        override: true
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
 
-    - name: Build
-      run: cargo build --release --locked
+      - name: Build
+        run: cargo build --release --locked
 
-    - name: Upload binaries to release
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ matrix.asset_name }}
-        path: ${{ matrix.artifact_name }}
+      - name: Upload binaries to release
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.asset_name }}
+          path: target/release/${{ matrix.artifact_name }}
 
-    - name: Create Release
-      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
-        body: 'Release of ${{ github.ref }}'
+      - name: Create Release
+        id: create_release
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+          body: "Release of ${{ github.ref }}"
 
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ steps.upload_binaries.outputs.path }}
-        asset_name: ${{ matrix.asset_name }}
-        asset_content_type: application/octet-stream
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: target/release/${{ matrix.artifact_name }}
+          asset_name: ${{ matrix.asset_name }}
+          asset_content_type: application/octet-stream
