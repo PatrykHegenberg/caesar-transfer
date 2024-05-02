@@ -8,7 +8,7 @@ use crate::relay::transfer::TransferResponse;
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 pub async fn download_info(relay: &str, name: &str) -> Result<TransferResponse> {
-    let url = String::from("http://") + relay;
+    let url = String::from(relay);
     let hashed_name = Sha256::digest(name.as_bytes());
     let hashed_string = hex::encode(hashed_name);
 
@@ -25,7 +25,7 @@ pub async fn download_info(relay: &str, name: &str) -> Result<TransferResponse> 
 }
 
 pub async fn download_success(relay: &str, name: &str) -> Result<()> {
-    let url = String::from("http://") + relay;
+    let url = String::from(relay);
     let hashed_name = Sha256::digest(name.as_bytes());
     let hashed_string = hex::encode(hashed_name);
 

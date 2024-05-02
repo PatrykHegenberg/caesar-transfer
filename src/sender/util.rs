@@ -32,6 +32,15 @@ pub fn hash_random_name(name: String) -> String {
     hex::encode(hashed_name)
 }
 
+pub fn replace_protocol(address: &str) -> String {
+    let mut result = address.to_string();
+    result = result.replace("ws://", "http://");
+
+    result = result.replace("wss://", "https://");
+
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

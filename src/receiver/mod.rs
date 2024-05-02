@@ -38,7 +38,7 @@
 pub mod client;
 pub mod http_client;
 
-use crate::receiver::client as receiver;
+use crate::{receiver::client as receiver, sender::util::replace_protocol};
 
 use tokio_tungstenite::{
     connect_async,
@@ -47,9 +47,12 @@ use tokio_tungstenite::{
 use tracing::{debug, error};
 
 pub async fn start_receiver(relay: &str, name: &str) {
-    let res = http_client::download_info(relay, name).await.unwrap();
+    let http_url = replace_protocol(relay);
+    let res = http_client::download_info(http_url.as_str(), name)
+        .await
+        .unwrap();
     debug!("Got room_id from Server: {:?}", res);
-    let res_ip = res.ip + ":9000";
+    let res_ip = String::from("ws://") + res.ip.as_str() + ":9000";
 
     if let Err(local_err) = start_ws_com(res_ip.as_str(), res.local_room_id.as_str()).await {
         debug!("Failed to connect local: {local_err}");
@@ -57,7 +60,7 @@ pub async fn start_receiver(relay: &str, name: &str) {
             debug!("Failed to connect remote: {relay_err}");
         }
     }
-    let success = http_client::download_success(relay, name).await;
+    let success = http_client::download_success(http_url.as_str(), name).await;
     match success {
         Ok(()) => debug!("Success"),
         Err(e) => error!("Error: {e:?}"),
@@ -72,7 +75,7 @@ pub async fn start_receiver(relay: &str, name: &str) {
 }
 
 pub async fn start_ws_com(relay: &str, name: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let url = String::from("ws://") + relay + "/ws";
+    let url = String::from(relay) + "/ws";
     let Ok(mut request) = url.into_client_request() else {
         println!("Error: Failed to create request.");
         return Err("Failed to create request".into());

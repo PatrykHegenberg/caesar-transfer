@@ -85,7 +85,7 @@ pub async fn start_sender(relay: Arc<String>, files: Arc<Vec<String>>) {
     });
     let local_thread = task::spawn(async move {
         connect_to_server(
-            Arc::new(String::from("0.0.0.0:9000")),
+            Arc::new(String::from("ws://0.0.0.0:9000")),
             local_files.clone(),
             Some(local_room_id),
             local_relay.clone(),
@@ -146,7 +146,7 @@ async fn connect_to_server(
     tx: mpsc::Sender<()>,
     is_local: bool,
 ) {
-    let url = format!("ws://{}/ws", relay);
+    let url = format!("{}/ws", relay);
     let message_relay = format!("{}", message_server);
     let transfer_name = format!("{}", transfer_name);
     match url.clone().into_client_request() {

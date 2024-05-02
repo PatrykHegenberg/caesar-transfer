@@ -1,5 +1,5 @@
 use crate::sender::http_client::send_info;
-use crate::sender::util::hash_random_name;
+use crate::sender::util::{hash_random_name, replace_protocol};
 use crate::shared::{
     packets::{
         list_packet, packet::Value, ChunkPacket, HandshakePacket, HandshakeResponsePacket,
@@ -135,7 +135,7 @@ fn on_create_room(
 
     let send_url = url.to_string();
     let h_name = hash_name.to_string();
-    let server_url = String::from("http://") + relay.as_str();
+    let server_url = replace_protocol(relay.as_str());
     let res = std::thread::spawn(move || {
         tokio::runtime::Builder::new_current_thread()
             .enable_all()
