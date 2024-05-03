@@ -7,29 +7,29 @@ on:
       - "*"
 
 jobs:
-  publish:
-    name: ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: taiki-e/create-gh-release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  upload-assets:
+    needs: create-release
     strategy:
       matrix:
         include:
-          - name: Windows
-            os: windows-latest
-            artifact_name: caesar.exe
-            asset_name: caesar-windows.exe
-          - name: MacOS
-            os: macos-latest
-            artifact_name: caesar
-            asset_name: caesar-macos
-          - name: Linux
+          - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
-            artifact_name: caesar
-            asset_name: caesar-linux
-
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+          - target: x86_64-apple-darwin
+            os: macos-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-
+        uses: actions/checkout@v4
       - name: Install deps on MacOS
         if: matrix.os == 'macos-latest'
         run: brew install protobuf
@@ -42,40 +42,12 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get -y install protobuf-compiler
 
-      - uses: actions-rs/toolchain@v1
+      - name: Upload
+        uses: taiki-e/upload-rust-binary-action@v1
         with:
-          toolchain: stable
-          profile: minimal
-          override: true
-
-      - name: Build
-        run: cargo build --release --locked
-
-      - name: Upload binaries to release
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.asset_name }}
-          path: target/release/${{ matrix.artifact_name }}
-
-      - name: Create Release
-        id: create_release
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
-          body: "Release of ${{ github.ref }}"
-
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: target/release/${{ matrix.artifact_name }}
-          asset_name: ${{ matrix.asset_name }}
-          asset_content_type: application/octet-stream
+          bin: caesar
+          target: ${{ matrix.target }}
+          build-tool: cargo
+          tar: unix
+          zip: windows
+          token: ${{ secrets.GITHUB_TOKEN }}
