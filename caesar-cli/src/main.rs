@@ -3,11 +3,7 @@ use dotenv::dotenv;
 use tracing::error;
 use tracing_subscriber::filter::EnvFilter;
 
-pub mod cli;
-pub mod receiver;
-pub mod relay;
-pub mod sender;
-pub mod shared;
+mod cli;
 
 #[tokio::main]
 // This is the entrypoint of caesar.
