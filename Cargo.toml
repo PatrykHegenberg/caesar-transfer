@@ -1,3 +1,10 @@
 [workspace]
 resolver = "2"
-members = ["caesar-cli", "caesar-core", "caesar-shuttle"]
+members = [
+  "caesar-cli",
+  "caesar-core",
+  "caesar-desktop",
+  "caesar-mobile",
+  "caesar-shuttle",
+  "caesar-tui",
+]
