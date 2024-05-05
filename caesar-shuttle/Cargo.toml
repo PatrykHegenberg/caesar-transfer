@@ -1,0 +1,18 @@
+[package]
+name = "caesar-transfer-iu"
+version = "0.3.1"
+edition = "2021"
+authors = ["Manuel Keidel, Patryk Hegenberg, Krzysztof Stankiewicz"]
+
+[[bin]]
+name = "caesar-transfer-iu"
+path = "src/main.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+caesar-core = { path = "../caesar-core" }
+shuttle-axum = { version = "0.44.0" }
+shuttle-runtime = { version = "0.44.0" }
+axum = { version = "0.7.5", features = ["ws"] }
+axum-client-ip = "0.6.0"

@@ -1,19 +1,14 @@
-use crate::relay::appstate::AppState;
-use crate::relay::server::download_info;
-use crate::relay::server::download_success;
-use crate::relay::server::upload_info;
-use crate::relay::server::ws_handler;
 use axum::{
     routing::{get, post, put},
     Router,
 };
 use axum_client_ip::SecureClientIpSource;
+use caesar_core::relay::appstate::AppState;
+use caesar_core::relay::server::download_info;
+use caesar_core::relay::server::download_success;
+use caesar_core::relay::server::upload_info;
+use caesar_core::relay::server::ws_handler;
 use shuttle_axum::ShuttleAxum;
-
-pub mod receiver;
-pub mod relay;
-pub mod sender;
-pub mod shared;
 
 #[shuttle_runtime::main]
 async fn axum() -> ShuttleAxum {
