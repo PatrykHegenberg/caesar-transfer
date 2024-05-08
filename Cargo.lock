@@ -461,6 +461,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "caesar-desktop"
+version = "0.0.1"
+dependencies = [
+ "caesar-core",
+]
+
+[[package]]
+name = "caesar-mobile"
+version = "0.0.1"
+dependencies = [
+ "caesar-core",
+]
+
+[[package]]
 name = "caesar-transfer-iu"
 version = "0.3.1"
 dependencies = [
@@ -469,6 +483,13 @@ dependencies = [
  "caesar-core",
  "shuttle-axum",
  "shuttle-runtime",
+]
+
+[[package]]
+name = "caesar-tui"
+version = "0.0.1"
+dependencies = [
+ "caesar-core",
 ]
 
 [[package]]
