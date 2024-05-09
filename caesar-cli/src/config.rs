@@ -13,8 +13,8 @@ pub struct CaesarConfig {
 
 lazy_static! {
     pub static ref GLOBAL_CONFIG: CaesarConfig = {
-        let cfg: CaesarConfig = confy::load("caesar", "caesar")
-            .expect("Konfigurationsdatei konnte nicht geladen werden");
+        let cfg: CaesarConfig =
+            confy::load("caesar", "caesar").expect("could not find config file");
         cfg
     };
 }
