@@ -5,6 +5,8 @@ use clap::{Parser, Subcommand};
 use std::{env, sync::Arc};
 use tracing::debug;
 
+use crate::GLOBAL_CONFIG;
+
 #[derive(Parser, Debug)]
 #[command(version = env!("CARGO_PKG_VERSION"), about = "Send and receive files securely")]
 #[command(long_about = None)]
@@ -61,16 +63,11 @@ impl Args {
     }
 
     pub async fn run(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+        let cfg = &GLOBAL_CONFIG;
         debug!("args: {:#?}", self);
         match &self.command {
             Some(Commands::Send { relay, files }) => {
-                let relay_string: String = relay
-                    .as_deref()
-                    .unwrap_or(
-                        &env::var("APP_ORIGIN")
-                            .unwrap_or("wss://caesar-transfer-iu.shuttleapp.rs/ws".to_string()),
-                    )
-                    .to_string();
+                let relay_string: String = relay.as_deref().unwrap_or(&cfg.app_origin).to_string();
                 let relay_arc = Arc::new(relay_string);
                 let files_arc = Arc::new(files.to_vec());
                 sender::start_sender(relay_arc, files_arc).await;
@@ -81,22 +78,20 @@ impl Args {
                 name,
             }) => {
                 println!("Receive for {name:?}");
-                receiver::start_receiver(
-                    relay.as_deref().unwrap_or(
-                        env::var("APP_ORIGIN")
-                            .unwrap_or("ws://0.0.0.0:8000/ws".to_string())
-                            .as_str(),
-                    ),
-                    name,
-                )
-                .await;
+                receiver::start_receiver(relay.as_deref().unwrap_or(&cfg.app_origin), name).await;
             }
             Some(Commands::Serve {
                 port,
                 listen_address,
             }) => {
                 println!("Serve with address '{listen_address:?}' and '{port:?}'");
-                relay::server::start_ws(port.as_ref(), listen_address.as_ref()).await;
+                let address: String = listen_address
+                    .as_deref()
+                    .unwrap_or(&cfg.app_host)
+                    .to_string();
+                let port_value = port.unwrap_or(cfg.app_port.parse::<i32>().unwrap_or(0));
+                let port: i32 = port_value;
+                relay::server::start_ws(&port, &address).await;
             }
             None => {}
         }

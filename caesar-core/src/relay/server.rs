@@ -8,7 +8,7 @@ use axum::{
 
 use futures_util::StreamExt;
 use serde_json::json;
-use std::{env, net::SocketAddr, sync::Arc};
+use std::{net::SocketAddr, sync::Arc};
 use tokio::{
     net::TcpListener,
     signal,
@@ -21,15 +21,9 @@ use crate::relay::client::Client;
 use crate::relay::transfer::TransferResponse;
 use crate::relay::{appstate::AppState, transfer::TransferRequest};
 
-pub async fn start_ws(port: Option<&i32>, listen_addr: Option<&String>) {
-    let app_host = match listen_addr {
-        Some(address) => address.to_string(),
-        None => env::var("APP_HOST").unwrap_or("0.0.0.0".to_string()),
-    };
-    let app_port = match port {
-        Some(port) => port.to_string(),
-        None => env::var("APP_PORT").unwrap_or("8000".to_string()),
-    };
+pub async fn start_ws(port: &i32, listen_addr: &String) {
+    let app_host = listen_addr;
+    let app_port = port;
 
     debug!("Server configured to accept connections on host {app_host}...",);
     debug!("Server configured to listen connections on port {app_port}...",);
