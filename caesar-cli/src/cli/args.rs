@@ -5,7 +5,7 @@ use clap::{Parser, Subcommand};
 use std::{env, sync::Arc};
 use tracing::debug;
 
-use crate::GLOBAL_CONFIG;
+use crate::config::GLOBAL_CONFIG;
 
 #[derive(Parser, Debug)]
 #[command(version = env!("CARGO_PKG_VERSION"), about = "Send and receive files securely")]
