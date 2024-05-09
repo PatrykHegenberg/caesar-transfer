@@ -51,6 +51,6 @@ mod tests {
 
         assert!(name.contains('-'));
         assert!(name.split('-').count() == 3);
-        assert!(name.len() > 0);
+        assert!(name.is_empty());
     }
 }
