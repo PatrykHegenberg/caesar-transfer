@@ -20,6 +20,7 @@ env_logger = "0.11.3"
 caesar-core = { path = "../../caesar-core" }
 tauri = { version = "2.0.0-beta", features = [] }
 tauri-plugin-shell = "2.0.0-beta"
+tauri-plugin-dialog = "2.0.0-beta"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 

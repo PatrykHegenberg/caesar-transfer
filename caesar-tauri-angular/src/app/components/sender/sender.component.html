@@ -1,23 +1,26 @@
-<!-- <div class="container">
-  <h1>Welcome to Tauri + Angular!</h1>
-  <div class="row">
-    <a href="https://tauri.app" target="_blank">
-      <img src="/assets/tauri.svg" class="logo tauri" alt="Tauri logo" />
-    </a>
-    <a href="https://angular.io" target="_blank">
-      <img src="/assets/angular.svg" class="logo angular" alt="Angular logo" />
-    </a>
-  </div>
-  <p>Click on the logos to learn more about the frameworks</p>
-
-  <form class="row" (submit)="greet($event, greetInput.value)">
-    <input #greetInput id="greet-input" placeholder="Enter a name..." />
-    <button type="submit">Greet</button>
-  </form>
-  <p>{{ greetingMessage }}</p>
-</div>
-<button (click)="sendData()">Send Data</button> -->
-
 <h2>Sender</h2>
 <p>Hier können Sie Dateien senden.</p>
-<button (click)="redirectToHome()">Startseite</button>
+
+<div class="form-group">
+  <label for="relayAddress">Relay Server Adresse:</label>
+  <input type="text" id="relayAddress" [(ngModel)]="relayAddress" placeholder="::1">
+</div>
+<div class="form-group">
+  <label for="relayPort">Port:</label>
+  <input type="text" id="relayPort" [(ngModel)]="relayPort" placeholder="8000">
+</div>
+
+<div class="form-group">
+  <button (click)="selectFile()">Datei anfügen</button>
+</div>
+
+<ul class="file-list">
+  <li *ngFor="let fileName of fileNames">{{ fileName }}</li>
+</ul>
+
+<div class="form-group">
+  <button (click)="sendData()">Daten senden</button>
+</div>
+<div class="form-group">
+  <button (click)="redirectToHome()">Startseite</button>
+</div>

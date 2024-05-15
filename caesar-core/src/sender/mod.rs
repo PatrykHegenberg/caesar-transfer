@@ -18,11 +18,16 @@ use tower_http::trace::{DefaultMakeSpan, TraceLayer};
 use tracing::{debug, error, info};
 use uuid::Uuid;
 
-pub async fn start_sender(relay: Arc<String>, files: Arc<Vec<String>>) {
+pub async fn start_sender(relay: Arc<String>, files: Arc<Vec<String>>, transfer_name: String) {
     let (tx, mut rx) = mpsc::channel(1);
     debug!("Got relay: {relay}");
     let room_id = Uuid::new_v4().to_string();
-    let rand_name = generate_random_name();
+    let rand_name: String;
+    if transfer_name.is_empty() {
+        rand_name = generate_random_name();
+     } else {
+        rand_name = transfer_name.clone(); 
+    }
     let local_room_id = room_id.clone();
     let local_files = files.clone();
     let local_relay = relay.clone();
@@ -55,6 +60,7 @@ pub async fn start_sender(relay: Arc<String>, files: Arc<Vec<String>>) {
         )
         .await
     });
+
 
     rx.recv().await.unwrap();
     local_ws_thread.abort();
