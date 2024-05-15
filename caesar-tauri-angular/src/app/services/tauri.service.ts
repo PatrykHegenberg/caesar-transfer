@@ -13,8 +13,12 @@ export class TauriService {
     await invoke('send', { relay, files });
   }
 
-  serve(port: number, listen_addr: string): Promise<any> {
+  async serve(port: number, listen_addr: string): Promise<any> {
     console.log("Listening on address:" + listen_addr + ":" + port);
     return invoke('serve', { port: port, listen_addr: listen_addr });
+  }
+
+  async receive(relay: string, name: string) {
+    return invoke('receive',{relay: relay, name: name});
   }
 }

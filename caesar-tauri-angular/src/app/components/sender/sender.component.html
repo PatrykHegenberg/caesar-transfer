@@ -1,26 +1,39 @@
+<!-- src/app/app.component.html -->
 <h2>Sender</h2>
 <p>Hier können Sie Dateien senden.</p>
 
-<div class="form-group">
+<div *ngIf="!sendingInProgress && !sendingSuccess" class="form-group">
   <label for="relayAddress">Relay Server Adresse:</label>
   <input type="text" id="relayAddress" [(ngModel)]="relayAddress" placeholder="::1">
 </div>
-<div class="form-group">
+<div *ngIf="!sendingInProgress && !sendingSuccess" class="form-group">
   <label for="relayPort">Port:</label>
   <input type="text" id="relayPort" [(ngModel)]="relayPort" placeholder="8000">
 </div>
 
-<div class="form-group">
-  <button (click)="selectFile()">Datei anfügen</button>
+<div *ngIf="!sendingInProgress && !sendingSuccess" class="form-group">
+  <button (click)="selectFile()" [disabled]="sendingInProgress">Datei anfügen</button>
 </div>
 
 <ul class="file-list">
   <li *ngFor="let fileName of fileNames">{{ fileName }}</li>
 </ul>
 
-<div class="form-group">
-  <button (click)="sendData()">Daten senden</button>
+<div *ngIf="!sendingInProgress && !sendingSuccess" class="form-group">
+  <button (click)="sendData()" [disabled]="sendingInProgress">Daten senden</button>
 </div>
 <div class="form-group">
   <button (click)="redirectToHome()">Startseite</button>
 </div>
+<div *ngIf="sendingInProgress">
+  <p>Sending files... Transfer Name: {{ transferName }}</p>
+</div>
+
+<div *ngIf="!sendingInProgress && sendingSuccess">
+  <p>Data sent successfully! Transfer Name: {{ transferName }}</p>
+</div>
+
+<div *ngIf="!sendingInProgress && !sendingSuccess && transferName === null">
+  <p>No data being sent.</p>
+</div>
+

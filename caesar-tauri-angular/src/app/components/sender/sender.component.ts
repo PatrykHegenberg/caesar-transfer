@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef  } from '@angular/core';
 import { TauriService } from '../../services/tauri.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FileResponse, open } from '@tauri-apps/plugin-dialog';
+import { listen } from '@tauri-apps/api/event';
 
 @Component({
   selector: 'app-sender',
@@ -16,11 +17,33 @@ export class SenderComponent {
   files: string[] = [];
   fileNames: string[] = [];
   relayAddress: string = ''; 
-  relayPort?: number;  
-  constructor(private tauriService: TauriService, private router: Router) {}
+  relayPort?: number | null;
+  sendingInProgress = false;
+  sendingSuccess = false;
+  transferName: string = "";
+  constructor(private tauriService: TauriService, private router: Router, private cdr: ChangeDetectorRef) {
+    this.listenToTransferEvents();
+  }
 
   redirectToHome() {
     this.router.navigate([''])
+  }
+
+  private listenToTransferEvents() {
+    listen('transfer_name_event', (event) => {
+      this.transferName = event.payload as string; 
+      this.cdr.detectChanges();
+    })
+  }
+
+  reset() {
+    this.files = [];
+    this.fileNames = [];
+    this.relayAddress = '';
+    this.sendingInProgress = false;
+    this.sendingSuccess = false;
+    this.transferName = '';
+    this.relayPort = null;
   }
 
   async selectFile() {
@@ -40,9 +63,24 @@ export class SenderComponent {
   sendData() {
     const relay = this.getRelayURL();
     if (this.files.length > 0) {
+      this.sendingInProgress = true;
+      this.sendingSuccess = false;
       this.tauriService.send(relay, this.files)
-        .then(sendDataReturn => console.log(sendDataReturn + ' Data sent successfully'))
-        .catch(error => console.error('Error sending data:', error));
+        .then(sendDataReturn => {
+          console.log(sendDataReturn + ' Data sent successfully');
+          this.sendingSuccess = true;
+          setTimeout(() => {
+            this.reset();
+          }, 5000);
+        })
+        .catch(error => {
+          console.error('Error sending data:', error);
+          this.sendingSuccess = false;
+          this.sendingInProgress = false;
+        })
+        .finally(() => {
+          this.sendingInProgress = false;
+        });
     } else {
       console.error('No files to send.');
     }

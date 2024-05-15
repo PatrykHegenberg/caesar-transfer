@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
 import { SenderComponent } from './components/sender/sender.component';
 import { TauriService } from './services/tauri.service';
-import { ReceiverComponent } from './receiver/receiver.component';
+import { ReceiverComponent } from './components/receiver/receiver.component';
 
 @Component({
   selector: 'app-root',

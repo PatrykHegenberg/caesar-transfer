@@ -1,0 +1,23 @@
+<h2>Receiver</h2>
+<p>Hier können Sie Dateien empfangen.</p>
+
+<div class="form-group">
+  <label for="relayAddress">Relay Server Adresse:</label>
+  <input type="text" id="relayAddress" [(ngModel)]="relayAddress" placeholder="::1">
+</div>
+<div class="form-group">
+  <label for="relayPort">Port:</label>
+  <input type="text" id="relayPort" [(ngModel)]="relayPort" placeholder="8000">
+</div>
+
+<div class="form-group">
+    <label for="relayPort">Transfername:</label>
+    <input type="text" id="transferName" [(ngModel)]="transferName" placeholder="Transfername">
+  </div>
+
+<div class="form-group">
+  <button (click)="receiveData()">Daten empfangen</button>
+</div>
+<div class="form-group">
+  <button (click)="redirectToHome()">Startseite</button>
+</div>

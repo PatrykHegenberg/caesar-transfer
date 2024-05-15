@@ -1,6 +1,7 @@
 use caesar_core::receiver;
 use caesar_core::relay;
 use caesar_core::sender;
+use caesar_core::sender::util::generate_random_name;
 use clap::{Parser, Subcommand};
 use std::{env, sync::Arc};
 use tracing::debug;
@@ -70,7 +71,8 @@ impl Args {
                 let relay_string: String = relay.as_deref().unwrap_or(&cfg.app_origin).to_string();
                 let relay_arc = Arc::new(relay_string);
                 let files_arc = Arc::new(files.to_vec());
-                sender::start_sender(relay_arc, files_arc).await;
+                let transfer_name = generate_random_name();
+                sender::start_sender(relay_arc, files_arc, transfer_name).await;
             }
             Some(Commands::Receive {
                 relay,
