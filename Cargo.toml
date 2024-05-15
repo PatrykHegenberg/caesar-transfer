@@ -7,4 +7,5 @@ members = [
   "caesar-mobile",
   "caesar-shuttle",
   "caesar-tui",
+  "caesar-tauri-angular/src-tauri"
 ]

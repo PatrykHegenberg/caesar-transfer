@@ -1,0 +1,38 @@
+.logo.angular:hover {
+    filter: drop-shadow(0 0 2em #e32727);
+  }
+  
+  /* Zentriert das Menü horizontal und vertikal */
+  .menu-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Höhe der gesamten Ansichtshöhe */
+  }
+  
+  .menu {
+    background-color: #333;
+    padding: 20px;
+    border-radius: 8px;
+  }
+  
+  .menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+  }
+  
+  .menu ul li {
+    margin: 0 20px; /* Abstand zwischen den Menüelementen */
+  }
+  
+  .menu ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+  }
+  
+  .menu ul li a:hover {
+    text-decoration: underline;
+  }

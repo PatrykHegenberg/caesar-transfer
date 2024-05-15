@@ -15,10 +15,10 @@ impl Default for CaesarConfig {
     fn default() -> Self {
         CaesarConfig {
             app_environment: "production".to_string(),
-            app_host: "0.0.0.0".to_string(),
+            app_host: "localhost".to_string(),
             app_port: "8000".to_string(),
             app_origin: "wss://caesar-transfer-iu.shuttleapp.rs".to_string(),
-            app_relay: "0.0.0.0:8000".to_string(),
+            app_relay: "localhost:8000".to_string(),
             rust_log: "info".to_string(),
         }
     }

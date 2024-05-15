@@ -45,7 +45,7 @@ pub async fn start_sender(relay: Arc<String>, files: Arc<Vec<String>>) {
     });
     let local_thread = task::spawn(async move {
         connect_to_server(
-            Arc::new(String::from("ws://0.0.0.0:9000")),
+            Arc::new(String::from("ws://localhost:9000")),
             local_files.clone(),
             Some(local_room_id),
             local_relay.clone(),
@@ -63,7 +63,7 @@ pub async fn start_sender(relay: Arc<String>, files: Arc<Vec<String>>) {
 }
 
 pub async fn start_local_ws() {
-    let app_host = "0.0.0.0";
+    let app_host = "localhost";
     let app_port = "9000";
 
     let server = AppState::new();
