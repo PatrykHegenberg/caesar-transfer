@@ -22,6 +22,7 @@ use std::{
     path::Path,
     time::Duration,
 };
+// use tokio::sync::mpsc;
 use tokio::{io::AsyncReadExt, task::JoinHandle, time::sleep};
 use tokio_tungstenite::tungstenite::{protocol::Message as WebSocketMessage, Error};
 use tracing::{debug, error};
@@ -47,6 +48,21 @@ struct Context {
     task: Option<JoinHandle<()>>,
 }
 
+// pub struct ProgressSender {
+//     tx: mpsc::Sender<String>,
+// }
+//
+// impl ProgressSender {
+//     pub fn new() -> (Self, mpsc::Receiver<String>) {
+//         let (tx, rx) = mpsc::channel(100);
+//         (Self { tx }, rx)
+//     }
+//
+//     pub async fn send(&self, message: String) -> Result<(), mpsc::error::SendError<String>> {
+//         self.tx.send(message).await
+//     }
+// }
+//
 fn on_create_room(
     context: &Context,
     id: String,
@@ -143,6 +159,7 @@ fn on_leave_room(context: &mut Context, _: usize) -> Status {
 }
 
 fn on_progress(context: &Context, progress: ProgressPacket) -> Status {
+    // let prog_sender = ProgressSender::new();
     if context.shared_key.is_none() {
         return Status::Err("Invalid progress packet: no shared key established".into());
     }
@@ -155,6 +172,11 @@ fn on_progress(context: &Context, progress: ProgressPacket) -> Status {
     print!("\rTransferring '{}': {}%", file.name, progress.progress);
     stdout().flush().unwrap();
 
+    // let progress_message = format!("Transferring '{}': {}%", file.name, progress.progress);
+    // print!("\r{}", progress_message);
+    // stdout().flush().unwrap();
+    // prog_sender.0.send(progress_message);
+    //
     if progress.progress == 100 {
         println!();
 
@@ -275,7 +297,7 @@ fn on_message(
             };
             return match packet {
                 JsonPacketResponse::Create { id } => {
-                   on_create_room(context, id, relay, transfer_name, is_local) 
+                    on_create_room(context, id, relay, transfer_name, is_local)
                 }
                 JsonPacketResponse::Join { size } => on_join_room(context, size),
                 JsonPacketResponse::Leave { index } => on_leave_room(context, index),
@@ -303,7 +325,7 @@ fn on_message(
                 }
                 Value::Progress(progress) => on_progress(context, progress),
                 _ => Status::Err(format!("Unexpected packet: {:?}", value)),
-            }
+            };
         }
         _ => (),
     }

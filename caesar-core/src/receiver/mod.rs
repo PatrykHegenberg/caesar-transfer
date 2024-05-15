@@ -2,6 +2,7 @@ pub mod client;
 pub mod http_client;
 
 use crate::{receiver::client as receiver, sender::util::replace_protocol};
+use anyhow::{anyhow, Result};
 
 use tokio_tungstenite::{
     connect_async,
@@ -9,7 +10,7 @@ use tokio_tungstenite::{
 };
 use tracing::{debug, error};
 
-pub async fn start_receiver(relay: &str, name: &str) {
+pub async fn start_receiver(relay: &str, name: &str) -> Result<()> {
     let http_url = replace_protocol(relay);
     let res = http_client::download_info(http_url.as_str(), name)
         .await
@@ -23,19 +24,19 @@ pub async fn start_receiver(relay: &str, name: &str) {
             debug!("Failed to connect remote: {relay_err}");
         }
     }
-    let success = http_client::download_success(http_url.as_str(), name).await;
-    match success {
-        Ok(()) => debug!("Success"),
-        Err(e) => error!("Error: {e:?}"),
-    };
+    let _success = http_client::download_success(http_url.as_str(), name)
+        .await
+        .map_err(|e| anyhow!("Failed to download success: {}", e))?;
+
+    debug!("Success");
+    Ok(())
 }
 
-pub async fn start_ws_com(relay: &str, name: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn start_ws_com(relay: &str, name: &str) -> Result<()> {
     let url = String::from(relay) + "/ws";
-    let Ok(mut request) = url.into_client_request() else {
-        println!("Error: Failed to create request.");
-        return Err("Failed to create request".into());
-    };
+    let mut request = url
+        .into_client_request()
+        .map_err(|e| anyhow!("Failed to create request: {}", e))?;
 
     request
         .headers_mut()
