@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './receiver.component.css'
 })
 export class ReceiverComponent {
-  relayAddress: string = ''; 
+  relayAddress: string = '';
   relayPort?: number;
   transferName: string = '';
   constructor(private tauriService: TauriService, private router: Router) {}
