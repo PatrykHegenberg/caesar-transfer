@@ -23,6 +23,7 @@ use std::{
     time::Duration,
 };
 // use tokio::sync::mpsc;
+use tokio::sync::mpsc;
 use tokio::{io::AsyncReadExt, task::JoinHandle, time::sleep};
 use tokio_tungstenite::tungstenite::{protocol::Message as WebSocketMessage, Error};
 use tracing::{debug, error};
@@ -48,21 +49,6 @@ struct Context {
     task: Option<JoinHandle<()>>,
 }
 
-// pub struct ProgressSender {
-//     tx: mpsc::Sender<String>,
-// }
-//
-// impl ProgressSender {
-//     pub fn new() -> (Self, mpsc::Receiver<String>) {
-//         let (tx, rx) = mpsc::channel(100);
-//         (Self { tx }, rx)
-//     }
-//
-//     pub async fn send(&self, message: String) -> Result<(), mpsc::error::SendError<String>> {
-//         self.tx.send(message).await
-//     }
-// }
-//
 fn on_create_room(
     context: &Context,
     id: String,
@@ -158,8 +144,16 @@ fn on_leave_room(context: &mut Context, _: usize) -> Status {
     Status::Continue()
 }
 
+async fn send_progress(
+    progress_tx: &mpsc::Sender<String>,
+    progress_message: String,
+) -> Result<(), mpsc::error::SendError<String>> {
+    progress_tx.send(progress_message).await
+}
+
 fn on_progress(context: &Context, progress: ProgressPacket) -> Status {
     // let prog_sender = ProgressSender::new();
+    let (progress_tx, _) = mpsc::channel(100);
     if context.shared_key.is_none() {
         return Status::Err("Invalid progress packet: no shared key established".into());
     }
@@ -169,9 +163,18 @@ fn on_progress(context: &Context, progress: ProgressPacket) -> Status {
         None => return Status::Err("Invalid index in progress packet.".into()),
     };
 
+    let progress_message = format!("\rTransferring '{}': {}%", file.name, progress.progress);
     print!("\rTransferring '{}': {}%", file.name, progress.progress);
     stdout().flush().unwrap();
+    let send_result = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap()
+        .block_on(send_progress(&progress_tx, progress_message));
 
+    if let Err(e) = send_result {
+        eprintln!("Fehler beim Senden der Fortschrittsnachricht: {}", e);
+    }
     // let progress_message = format!("Transferring '{}': {}%", file.name, progress.progress);
     // print!("\r{}", progress_message);
     // stdout().flush().unwrap();
