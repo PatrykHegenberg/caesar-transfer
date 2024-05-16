@@ -19,7 +19,7 @@ const IS_DEBUG_MODE: bool = true;
 #[cfg(not(debug_assertions))]
 const IS_DEBUG_MODE: bool = false;
 
-pub async fn start_sender() {
+pub async fn start_sender() -> Result<bool> {
     use messages::ressource::*;
     let rand_name = generate_random_name();
     debug_print!("random name: {}", rand_name);
@@ -42,6 +42,7 @@ pub async fn start_sender() {
         .await;
         debug_print!("Start sender result: {:?}", out);
     }
+    Ok(true)
 }
 
 pub async fn start_receiver() -> Result<()> {

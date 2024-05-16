@@ -22,6 +22,13 @@ use tracing::error;
 const DESTINATION: u8 = 0;
 const NONCE_SIZE: usize = 12;
 
+#[cfg(target_os = "android")]
+// const FILE_PATH_PREFIX: &str = "/storage/emulated/0/Documents/";
+const FILE_PATH_PREFIX: &str = "/data/data/rust.executor_android/files";
+
+#[cfg(not(target_os = "android"))]
+const FILE_PATH_PREFIX: &str = ".";
+
 struct File {
     name: String,
     size: u64,
@@ -126,6 +133,24 @@ fn on_chunk(context: &mut Context, chunk: ChunkPacket) -> Status {
 
     context.sequence += 1;
 
+    #[cfg(target_os = "android")]
+    let file_path = format!("{}/{}", FILE_PATH_PREFIX, file.name);
+
+    // Öffnen Sie die Datei mit dem generierten Pfad
+    #[cfg(target_os = "android")]
+    let mut file_handle = match fs::File::create(&file_path) {
+        Ok(handle) => handle,
+        Err(error) => {
+            return Status::Err(format!(
+                "Error: Failed to create file '{}': {}",
+                file_path, error
+            ));
+        }
+    };
+    #[cfg(target_os = "android")]
+    file_handle.write(&chunk.chunk).unwrap();
+
+    #[cfg(not(target_os = "android"))]
     file.handle.write(&chunk.chunk).unwrap();
 
     file.progress = (context.length * 100) / file.size;

@@ -144,16 +144,7 @@ fn on_leave_room(context: &mut Context, _: usize) -> Status {
     Status::Continue()
 }
 
-async fn send_progress(
-    progress_tx: &mpsc::Sender<String>,
-    progress_message: String,
-) -> Result<(), mpsc::error::SendError<String>> {
-    progress_tx.send(progress_message).await
-}
-
 fn on_progress(context: &Context, progress: ProgressPacket) -> Status {
-    // let prog_sender = ProgressSender::new();
-    let (progress_tx, _) = mpsc::channel(100);
     if context.shared_key.is_none() {
         return Status::Err("Invalid progress packet: no shared key established".into());
     }
@@ -163,23 +154,9 @@ fn on_progress(context: &Context, progress: ProgressPacket) -> Status {
         None => return Status::Err("Invalid index in progress packet.".into()),
     };
 
-    let progress_message = format!("\rTransferring '{}': {}%", file.name, progress.progress);
     print!("\rTransferring '{}': {}%", file.name, progress.progress);
     stdout().flush().unwrap();
-    let send_result = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .unwrap()
-        .block_on(send_progress(&progress_tx, progress_message));
 
-    if let Err(e) = send_result {
-        eprintln!("Fehler beim Senden der Fortschrittsnachricht: {}", e);
-    }
-    // let progress_message = format!("Transferring '{}': {}%", file.name, progress.progress);
-    // print!("\r{}", progress_message);
-    // stdout().flush().unwrap();
-    // prog_sender.0.send(progress_message);
-    //
     if progress.progress == 100 {
         println!();
 

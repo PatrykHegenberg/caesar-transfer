@@ -1,0 +1,2 @@
+rust_input: ../flutter_test_lib/src/api/**/*.rs
+dart_output: lib/src/rust
