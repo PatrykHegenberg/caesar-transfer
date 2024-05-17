@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_test_gui/main.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_test_gui/src/rust/api/simple.dart';
@@ -61,6 +62,10 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
       } catch (e) {
         print('Fehler beim Starten des Receivers: $e');
       }
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => MyHomePage(title: 'Caesar Transfer')));
     }
     print("Transfer startet with app_origin: $appOrigin");
   }
@@ -129,6 +134,8 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
                 ),
                 decoration: const InputDecoration(
                   labelText: 'Enter Transfername',
+                  alignLabelWithHint: true,
+                  floatingLabelAlignment: FloatingLabelAlignment.center,
                   labelStyle: TextStyle(color: Colors.white54),
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white),
