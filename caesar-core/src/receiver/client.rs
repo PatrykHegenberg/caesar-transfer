@@ -23,11 +23,7 @@ const DESTINATION: u8 = 0;
 const NONCE_SIZE: usize = 12;
 
 #[cfg(target_os = "android")]
-// const FILE_PATH_PREFIX: &str = "/storage/emulated/0/Documents/";
-const FILE_PATH_PREFIX: &str = "/data/data/rust.executor_android/files";
-
-#[cfg(not(target_os = "android"))]
-const FILE_PATH_PREFIX: &str = ".";
+const FILE_PATH_PREFIX: &str = "/storage/emulated/0/Download";
 
 struct File {
     name: String,
@@ -80,11 +76,29 @@ fn on_list(context: &mut Context, list: ListPacket) -> Status {
 
     for entry in list.entries {
         let path = sanitize_filename::sanitize(entry.name.clone());
+        #[cfg(target_os = "android")]
+        let file_path = format!("{}/{}", FILE_PATH_PREFIX, path);
 
+        #[cfg(target_os = "android")]
+        if Path::new(&file_path).exists() {
+            return Status::Err(format!("The file '{}' already exists.", path));
+        }
+        #[cfg(target_os = "android")]
+        let handle = match fs::File::create(&file_path) {
+            Ok(handle) => handle,
+            Err(error) => {
+                return Status::Err(format!(
+                    "Error: Failed to create file '{}': {}",
+                    file_path, error
+                ));
+            }
+        };
+        #[cfg(not(target_os = "android"))]
         if Path::new(&path).exists() {
             return Status::Err(format!("The file '{}' already exists.", path));
         }
 
+        #[cfg(not(target_os = "android"))]
         let handle = match fs::File::create(&path) {
             Ok(handle) => handle,
             Err(error) => {
@@ -133,24 +147,6 @@ fn on_chunk(context: &mut Context, chunk: ChunkPacket) -> Status {
 
     context.sequence += 1;
 
-    #[cfg(target_os = "android")]
-    let file_path = format!("{}/{}", FILE_PATH_PREFIX, file.name);
-
-    // Öffnen Sie die Datei mit dem generierten Pfad
-    #[cfg(target_os = "android")]
-    let mut file_handle = match fs::File::create(&file_path) {
-        Ok(handle) => handle,
-        Err(error) => {
-            return Status::Err(format!(
-                "Error: Failed to create file '{}': {}",
-                file_path, error
-            ));
-        }
-    };
-    #[cfg(target_os = "android")]
-    file_handle.write(&chunk.chunk).unwrap();
-
-    #[cfg(not(target_os = "android"))]
     file.handle.write(&chunk.chunk).unwrap();
 
     file.progress = (context.length * 100) / file.size;

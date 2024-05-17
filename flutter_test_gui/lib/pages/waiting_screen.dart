@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test_gui/pages/send_screen.dart';
+// import 'package:flutter_test_gui/pages/send_screen.dart';
+import 'package:flutter_test_gui/main.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -45,7 +46,9 @@ class _WaitingScreenState extends State<WaitingScreen> {
     final outcome = await startRustSender(
         name: widget.transferName, relay: appOrigin, files: fileNames);
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => SendScreen()));
+        context,
+        MaterialPageRoute(
+            builder: (context) => MyHomePage(title: 'Caesar Transfer')));
   }
 
   @override

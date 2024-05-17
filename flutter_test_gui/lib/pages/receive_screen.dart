@@ -84,9 +84,11 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
           if (!_showScanner)
             GestureDetector(
               onTap: () {
-                setState(() {
-                  _showScanner = true;
-                });
+                if (Platform.isIOS || Platform.isAndroid) {
+                  setState(() {
+                    _showScanner = true;
+                  });
+                }
               },
               child: Container(
                 width: 200,
