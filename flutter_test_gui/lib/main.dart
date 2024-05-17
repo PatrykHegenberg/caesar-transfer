@@ -79,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
           centerTitle: true,
           title: Text(
             widget.title,
-            style: TextStyle(color: textColor),
+            style: const TextStyle(color: textColor),
           ),
           actions: [
             PopupMenuButton<String>(

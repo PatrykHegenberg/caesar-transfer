@@ -7,10 +7,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_test_gui/pages/waiting_screen.dart';
 import 'package:flutter_test_gui/src/rust/api/simple.dart';
 import 'package:flutter_test_gui/src/rust/frb_generated.dart';
+import 'package:flutter_test_gui/consts/consts.dart';
 
-const backColor = Color(0xFF32363E);
-const highlightColor = Color(0xFF98C379);
-const textColor = Color(0xFFABB2BF);
+// const backColor = Color(0xFF32363E);
+// const highlightColor = Color(0xFF98C379);
+// const textColor = Color(0xFFABB2BF);
 
 class SendScreen extends StatefulWidget {
   @override
@@ -47,7 +48,7 @@ class _SendScreenState extends State<SendScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backColor,
+      backgroundColor: Constants.backColor,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -77,35 +78,26 @@ class _SendScreenState extends State<SendScreen> {
                         Container(
                           height: 200,
                           width: 200,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                               shape: BoxShape.circle,
-                              color: _dragging
-                                  ? Colors.blue.withOpacity(0.4)
-                                  : textColor),
-                          child: _list.isEmpty
+                              color: Constants.textColor),
+                          child: _dragging
                               ? const Center(
                                   child: Icon(
-                                    Icons.add_circle_outlined,
-                                    color: highlightColor,
+                                    Icons.add_rounded,
+                                    color: Constants.highlightColor,
                                     size: 200,
                                   ),
                                 )
-                              : Text(_list.join("\n")),
+                              : const Center(
+                                child: Icon(
+                                  Icons.upload_rounded,
+                                  color: Constants.highlightColor,
+                                  size: 200,
+                                ),
+                          ),
                         ),
                         const SizedBox(height: 16),
-                        if (_list.isNotEmpty)
-                          SizedBox(
-                            height: 100,
-                            child: ListView.builder(
-                              itemCount: _list.length,
-                              itemBuilder: (context, index) {
-                                return Text(
-                                  _list[index].name,
-                                  style: const TextStyle(color: Colors.white),
-                                );
-                              },
-                            ),
-                          )
                       ],
                     ),
                   ),
@@ -115,8 +107,8 @@ class _SendScreenState extends State<SendScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: textColor,
-              foregroundColor: highlightColor,
+              backgroundColor: Constants.textColor,
+              foregroundColor: Constants.highlightColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),

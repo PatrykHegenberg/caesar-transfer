@@ -6,10 +6,11 @@ import 'package:cross_file/cross_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_test_gui/src/rust/api/simple.dart';
 import 'package:flutter_test_gui/src/rust/frb_generated.dart';
+import 'package:flutter_test_gui/consts/consts.dart';
 
-const backColor = Color(0xFF32363E);
-const highlightColor = Color(0xFF98C379);
-const textColor = Color(0xFFABB2BF);
+// const backColor = Color(0xFF32363E);
+// const highlightColor = Color(0xFF98C379);
+// const textColor = Color(0xFFABB2BF);
 
 class WaitingScreen extends StatefulWidget {
   final List<XFile> files;
@@ -54,7 +55,7 @@ class _WaitingScreenState extends State<WaitingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backColor,
+      backgroundColor: Constants.backColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -68,7 +69,7 @@ class _WaitingScreenState extends State<WaitingScreen> {
               data: widget.transferName,
               version: QrVersions.auto,
               size: 200,
-              foregroundColor: highlightColor,
+              foregroundColor: Constants.highlightColor,
             ),
           ],
         ),

@@ -6,10 +6,11 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_test_gui/src/rust/api/simple.dart';
 import 'package:flutter_test_gui/src/rust/frb_generated.dart';
+import 'package:flutter_test_gui/consts/consts.dart';
 
-const backColor = Color(0xFF32363E);
-const highlightColor = Color(0xFF98C379);
-const textColor = Color(0xFFABB2BF);
+// const backColor = Color(0xFF32363E);
+// const highlightColor = Color(0xFF98C379);
+// const textColor = Color(0xFFABB2BF);
 
 class ReceiveScreen extends StatefulWidget {
   @override
@@ -100,12 +101,12 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
                 height: 200,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: textColor,
+                  color: Constants.textColor,
                 ),
                 child: const Center(
                   child: Icon(
                     Icons.qr_code,
-                    color: highlightColor,
+                    color: Constants.highlightColor,
                     size: 100,
                   ),
                 ),
@@ -130,18 +131,18 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
                 controller: myController,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  color: highlightColor,
+                  color: Constants.highlightColor,
                 ),
                 decoration: const InputDecoration(
                   labelText: 'Enter Transfername',
                   alignLabelWithHint: true,
                   floatingLabelAlignment: FloatingLabelAlignment.center,
-                  labelStyle: TextStyle(color: Colors.white54),
+                  labelStyle: TextStyle(color: Constants.textColor),
                   enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
+                    borderSide: BorderSide(color: Constants.textColor),
                   ),
                   focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
+                    borderSide: BorderSide(color: Constants.textColor),
                   ),
                 ),
               ),
@@ -150,8 +151,8 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
           const SizedBox(height: 16),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: textColor,
-              foregroundColor: highlightColor,
+              backgroundColor: Constants.textColor,
+              foregroundColor: Constants.highlightColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -163,7 +164,7 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
           ),
           Text(
             greetingText,
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: Constants.textColor),
           ),
         ],
       )),
