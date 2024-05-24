@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test_gui/main.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_test_gui/src/rust/api/simple.dart';
 import 'package:flutter_test_gui/src/rust/frb_generated.dart';
@@ -20,7 +21,7 @@ class ReceiveScreen extends StatefulWidget {
 class _ReceiveScreenState extends State<ReceiveScreen> {
   String appOrigin = '';
   final myController = TextEditingController();
-  String greetingText = '';
+  String inputValue = '';
   bool _showScanner = false;
 
   Widget _buildQRScanner() {
@@ -34,7 +35,7 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
           } else {
             final String code = barcode.raw.toString();
             setState(() {
-              greetingText = code;
+              inputValue = code;
               _showScanner = false;
             });
           }
@@ -52,31 +53,72 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
         'wss://caesar-transfer-iu.shuttleapp.rs'; // Laden Sie die app_origin
   }
 
-  Future<void> _startTransfer(String appOrigin) async {
-    final transferName = myController.text.trim();
-    if (transferName.isNotEmpty) {
-      try {
-        final outcome = await startRustReceiver(
-            transfername: transferName, relay: appOrigin);
-        print('Receiver erfolgreich gestartet ');
-        print('Ergebnis von Rust: $outcome');
-      } catch (e) {
-        print('Fehler beim Starten des Receivers: $e');
+  Future<bool> _requestPermission(Permission permission) async {
+    print("In _requestPermission");
+    if (await permission.isGranted) {
+      print("Granted");
+      return true;
+    } else {
+      print("Else Zweig");
+      final result = await permission.request();
+      if (result == PermissionStatus.granted) {
+        return true;
+      } else {
+        return false;
       }
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => MyHomePage(title: 'Caesar Transfer')));
+    }
+  }
+
+  Future<void> _startTransfer(String appOrigin) async {
+    final input = inputValue.trim();
+    if (input.isNotEmpty) {
+      if (Platform.isAndroid) {
+        if (await _requestPermission(Permission.manageExternalStorage)) {
+          try {
+            final outcome =
+                await startRustReceiver(transfername: input, relay: appOrigin);
+            print('Ergebnis von Rust: $outcome');
+          } catch (e) {
+            print('Fehler beim Starten des Receivers: $e');
+          }
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => MyHomePage(title: 'Caesar Transfer')));
+        } else {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => MyHomePage(title: 'Caesar Transfer')));
+        }
+      } else {
+        try {
+          final outcome =
+              await startRustReceiver(transfername: input, relay: appOrigin);
+          print('Ergebnis von Rust: $outcome');
+        } catch (e) {
+          print('Fehler beim Starten des Receivers: $e');
+        }
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => MyHomePage(title: 'Caesar Transfer')));
+      }
     }
     print("Transfer startet with app_origin: $appOrigin");
   }
-  // Future<void> _startTransfer(String appOrigin) async {
-  //   final transferName = myController.text.trim();
-  //   if (transferName.isNotEmpty) {
-  //     final outcome =
-  //         startRustReceiver(transfername: transferName, relay: appOrigin);
+
+  // Future<bool> requestPermission(Permission permission) async {
+  //   if (await permission.isGranted) {
+  //     return true;
+  //   } else {
+  //     var result = await permission.request();
+  //     if (result == PermissionStatus.granted) {
+  //       return true;
+  //     } else {
+  //       return false;
+  //     }
   //   }
-  //   print("Transfer startet with app_origin: $appOrigin");
   // }
 
   @override
@@ -133,6 +175,11 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
                 style: const TextStyle(
                   color: Constants.highlightColor,
                 ),
+                onChanged: (value) {
+                  setState(() {
+                    inputValue = value;
+                  });
+                },
                 decoration: const InputDecoration(
                   labelText: 'Enter Transfername',
                   alignLabelWithHint: true,
@@ -161,10 +208,6 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
               loadSettings().then((_) => _startTransfer(appOrigin));
             },
             child: const Text('Receive'),
-          ),
-          Text(
-            greetingText,
-            style: const TextStyle(color: Constants.textColor),
           ),
         ],
       )),

@@ -51,7 +51,8 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
   }
 
   void _sendTransferNameToRust(String appOrigin) {
-    final transferName = myController.text.trim();
+    final String transferName =
+        (greetingText.isEmpty) ? myController.text.trim() : greetingText;
     if (transferName.isNotEmpty) {
       TransferName(relay: appOrigin, transferName: transferName)
           .sendSignalToRust();
