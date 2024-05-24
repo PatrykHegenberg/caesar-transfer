@@ -23,7 +23,7 @@ const DESTINATION: u8 = 0;
 const NONCE_SIZE: usize = 12;
 
 #[cfg(target_os = "android")]
-const FILE_PATH_PREFIX: &str = "/storage/emulated/0/Download";
+const FILE_PATH_PREFIX: &str = "/storage/emulated/0/Documents";
 
 struct File {
     name: String,
@@ -74,10 +74,17 @@ fn on_list(context: &mut Context, list: ListPacket) -> Status {
         return Status::Err("Invalid list packet: no shared key established".into());
     }
 
+    #[cfg(target_os = "android")]
+    let mut prefix = std::path::PathBuf::from(std::env::current_exe().unwrap());
+    // #[cfg(target_os = "android")]
+    // prefix.pop();
+    // #[cfg(target_os = "android")]
+    // println!("prefix: {:?}", prefix);
     for entry in list.entries {
         let path = sanitize_filename::sanitize(entry.name.clone());
         #[cfg(target_os = "android")]
         let file_path = format!("{}/{}", FILE_PATH_PREFIX, path);
+        // let file_path = format!("{}/{}", prefix.display(), path);
 
         #[cfg(target_os = "android")]
         if Path::new(&file_path).exists() {
@@ -97,7 +104,7 @@ fn on_list(context: &mut Context, list: ListPacket) -> Status {
         if Path::new(&path).exists() {
             return Status::Err(format!("The file '{}' already exists.", path));
         }
-        
+
         #[cfg(not(target_os = "android"))]
         let handle = match fs::File::create(&path) {
             Ok(handle) => handle,
