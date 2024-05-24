@@ -41,6 +41,8 @@ tower = { version = "0.4", features = ["util"] }
 reqwest = { version = "0.12.4", features = ["blocking", "json"] }
 hex = "0.4.3"
 anyhow = "1.0.83"
+[target.'cfg(target_os = "linux")'.dependencies]
+openssl-sys = { version = "0.9.102", features = ["vendored"] }
 
 [build-dependencies]
 prost-build = "0.12.4"
