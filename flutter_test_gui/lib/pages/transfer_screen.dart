@@ -4,13 +4,9 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_test_gui/src/rust/api/simple.dart';
-import 'package:flutter_test_gui/src/rust/frb_generated.dart';
+// import 'package:flutter_test_gui/src/rust/frb_generated.dart';
 import 'package:flutter_test_gui/consts/consts.dart';
 import 'package:permission_handler/permission_handler.dart';
-
-// const backColor = Color(0xFF32363E);
-// const highlightColor = Color(0xFF98C379);
-// const textColor = Color(0xFFABB2BF);
 
 class TransferScreen extends StatefulWidget {
   final List<XFile> files;
@@ -21,10 +17,10 @@ class TransferScreen extends StatefulWidget {
       : super(key: key);
 
   @override
-  _TransferScreenState createState() => _TransferScreenState();
+  TransferScreenState createState() => TransferScreenState();
 }
 
-class _TransferScreenState extends State<TransferScreen> {
+class TransferScreenState extends State<TransferScreen> {
   String appOrigin = '';
   String inputValue = '';
   @override

@@ -5,12 +5,8 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_test_gui/src/rust/api/simple.dart';
-import 'package:flutter_test_gui/src/rust/frb_generated.dart';
+// import 'package:flutter_test_gui/src/rust/frb_generated.dart';
 import 'package:flutter_test_gui/consts/consts.dart';
-
-// const backColor = Color(0xFF32363E);
-// const highlightColor = Color(0xFF98C379);
-// const textColor = Color(0xFFABB2BF);
 
 class WaitingScreen extends StatefulWidget {
   final List<XFile> files;
@@ -21,10 +17,10 @@ class WaitingScreen extends StatefulWidget {
       : super(key: key);
 
   @override
-  _WaitingScreenState createState() => _WaitingScreenState();
+  WaitingScreenState createState() => WaitingScreenState();
 }
 
-class _WaitingScreenState extends State<WaitingScreen> {
+class WaitingScreenState extends State<WaitingScreen> {
   String appOrigin = '';
   @override
   void initState() {
@@ -35,7 +31,7 @@ class _WaitingScreenState extends State<WaitingScreen> {
   Future<void> loadSettings() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     appOrigin = prefs.getString('app_origin') ??
-        'wss://caesar-transfer-iu.shuttleapp.rs'; // Laden Sie die app_origin
+        'wss://caesar-transfer-iu.shuttleapp.rs';
   }
 
   Future<void> callStartSender(String appOrigin) async {

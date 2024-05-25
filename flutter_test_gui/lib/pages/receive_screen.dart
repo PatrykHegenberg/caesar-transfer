@@ -6,19 +6,17 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_test_gui/src/rust/api/simple.dart';
-import 'package:flutter_test_gui/src/rust/frb_generated.dart';
+// import 'package:flutter_test_gui/src/rust/frb_generated.dart';
 import 'package:flutter_test_gui/consts/consts.dart';
 
-// const backColor = Color(0xFF32363E);
-// const highlightColor = Color(0xFF98C379);
-// const textColor = Color(0xFFABB2BF);
-
 class ReceiveScreen extends StatefulWidget {
+  const ReceiveScreen({super.key});
+
   @override
-  _ReceiveScreenState createState() => _ReceiveScreenState();
+  ReceiveScreenState createState() => ReceiveScreenState();
 }
 
-class _ReceiveScreenState extends State<ReceiveScreen> {
+class ReceiveScreenState extends State<ReceiveScreen> {
   String appOrigin = '';
   final myController = TextEditingController();
   String inputValue = '';
@@ -84,12 +82,14 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => MyHomePage(title: 'Caesar Transfer')));
+                  builder: (context) =>
+                      const MyHomePage(title: 'Caesar Transfer')));
         } else {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => MyHomePage(title: 'Caesar Transfer')));
+                  builder: (context) =>
+                      const MyHomePage(title: 'Caesar Transfer')));
         }
       } else {
         try {
@@ -102,24 +102,12 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => MyHomePage(title: 'Caesar Transfer')));
+                builder: (context) =>
+                    const MyHomePage(title: 'Caesar Transfer')));
       }
     }
     print("Transfer startet with app_origin: $appOrigin");
   }
-
-  // Future<bool> requestPermission(Permission permission) async {
-  //   if (await permission.isGranted) {
-  //     return true;
-  //   } else {
-  //     var result = await permission.request();
-  //     if (result == PermissionStatus.granted) {
-  //       return true;
-  //     } else {
-  //       return false;
-  //     }
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +129,7 @@ class _ReceiveScreenState extends State<ReceiveScreen> {
               child: Container(
                 width: 200,
                 height: 200,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   color: Constants.textColor,
                 ),

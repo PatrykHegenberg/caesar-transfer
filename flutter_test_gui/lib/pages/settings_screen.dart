@@ -37,16 +37,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _appRelayController.text = appRelay;
     });
   }
-  // Future<void> loadSettings() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   setState(() {
-  //     _appEnvironmentController.text = prefs.getString('app_environment') ?? '';
-  //     _appHostController.text = prefs.getString('app_host') ?? '';
-  //     _appPortController.text = prefs.getString('app_port') ?? '';
-  //     _appOriginController.text = prefs.getString('app_origin') ?? '';
-  //     _appRelayController.text = prefs.getString('app_relay') ?? '';
-  //   });
-  // }
 
   Future<void> saveSettings() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -61,7 +51,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings'),
+        title: const Text('Settings'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -69,30 +59,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             TextField(
               controller: _appEnvironmentController,
-              decoration: InputDecoration(labelText: 'App Environment'),
+              decoration: const InputDecoration(labelText: 'App Environment'),
             ),
             TextField(
               controller: _appHostController,
-              decoration: InputDecoration(labelText: 'App Host'),
+              decoration: const InputDecoration(labelText: 'App Host'),
             ),
             TextField(
               controller: _appPortController,
-              decoration: InputDecoration(labelText: 'App Port'),
+              decoration: const InputDecoration(labelText: 'App Port'),
             ),
             TextField(
               controller: _appOriginController,
-              decoration: InputDecoration(labelText: 'App Origin'),
+              decoration: const InputDecoration(labelText: 'App Origin'),
             ),
             TextField(
               controller: _appRelayController,
-              decoration: InputDecoration(labelText: 'App Relay'),
+              decoration: const InputDecoration(labelText: 'App Relay'),
             ),
             ElevatedButton(
               onPressed: () async {
                 await saveSettings();
                 Navigator.pop(context);
               },
-              child: Text('Save'),
+              child: const Text('Save'),
             ),
           ],
         ),

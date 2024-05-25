@@ -6,19 +6,17 @@ import 'package:cross_file/cross_file.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_test_gui/pages/waiting_screen.dart';
 import 'package:flutter_test_gui/src/rust/api/simple.dart';
-import 'package:flutter_test_gui/src/rust/frb_generated.dart';
+// import 'package:flutter_test_gui/src/rust/frb_generated.dart';
 import 'package:flutter_test_gui/consts/consts.dart';
 
-// const backColor = Color(0xFF32363E);
-// const highlightColor = Color(0xFF98C379);
-// const textColor = Color(0xFFABB2BF);
-
 class SendScreen extends StatefulWidget {
+  const SendScreen({super.key});
+
   @override
-  _SendScreenState createState() => _SendScreenState();
+  SendScreenState createState() => SendScreenState();
 }
 
-class _SendScreenState extends State<SendScreen> {
+class SendScreenState extends State<SendScreen> {
   final List<XFile> _list = [];
   String transferName = '';
   bool _dragging = false;
@@ -90,12 +88,12 @@ class _SendScreenState extends State<SendScreen> {
                                   ),
                                 )
                               : const Center(
-                                child: Icon(
-                                  Icons.upload_rounded,
-                                  color: Constants.highlightColor,
-                                  size: 200,
+                                  child: Icon(
+                                    Icons.upload_rounded,
+                                    color: Constants.highlightColor,
+                                    size: 200,
+                                  ),
                                 ),
-                          ),
                         ),
                         const SizedBox(height: 16),
                       ],
