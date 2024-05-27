@@ -3,10 +3,11 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test_gui/main.dart';
+import 'package:flutter_test_gui/pages/transfer_screen.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_test_gui/src/rust/api/simple.dart';
+// import 'package:flutter_test_gui/src/rust/api/simple.dart';
 // import 'package:flutter_test_gui/src/rust/frb_generated.dart';
 import 'package:flutter_test_gui/consts/consts.dart';
 
@@ -82,18 +83,11 @@ class ReceiveScreenState extends State<ReceiveScreen> {
       }
       if (Platform.isAndroid) {
         if (await _requestPermission(Permission.manageExternalStorage)) {
-          try {
-            final outcome = await startRustReceiver(
-                filepath: filePath, transfername: input, relay: appOrigin);
-            print('Ergebnis von Rust: $outcome');
-          } catch (e) {
-            print('Fehler beim Starten des Receivers: $e');
-          }
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) =>
-                      const MyHomePage(title: 'Caesar Transfer')));
+                  builder: (context) => TransferScreen(
+                      transferName: input, directory: filePath)));
         } else {
           Navigator.push(
               context,
@@ -102,21 +96,13 @@ class ReceiveScreenState extends State<ReceiveScreen> {
                       const MyHomePage(title: 'Caesar Transfer')));
         }
       } else {
-        try {
-          final outcome = await startRustReceiver(
-              filepath: filePath, transfername: input, relay: appOrigin);
-          print('Ergebnis von Rust: $outcome');
-        } catch (e) {
-          print('Fehler beim Starten des Receivers: $e');
-        }
         Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (context) =>
-                    const MyHomePage(title: 'Caesar Transfer')));
+                    TransferScreen(transferName: input, directory: filePath)));
       }
     }
-    print("Transfer startet with app_origin: $appOrigin");
   }
 
   @override
