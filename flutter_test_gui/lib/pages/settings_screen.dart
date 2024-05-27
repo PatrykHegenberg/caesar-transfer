@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_test_gui/consts/consts.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -50,8 +51,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Constants.backColor,
       appBar: AppBar(
         title: const Text('Settings'),
+        backgroundColor: const Color(0xFF292c3c), //0xFF282C34),
+        foregroundColor: Constants.textColor,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -59,25 +63,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             TextField(
               controller: _appEnvironmentController,
-              decoration: const InputDecoration(labelText: 'App Environment'),
+              decoration: const InputDecoration(
+                  labelText: 'App Environment',
+                  labelStyle: TextStyle(color: Constants.highlightColor)),
+              style: const TextStyle(color: Constants.textColor),
             ),
             TextField(
               controller: _appHostController,
-              decoration: const InputDecoration(labelText: 'App Host'),
+              decoration: const InputDecoration(
+                  labelText: 'App Host',
+                  labelStyle: TextStyle(color: Constants.highlightColor)),
+              style: const TextStyle(color: Constants.textColor),
             ),
             TextField(
               controller: _appPortController,
-              decoration: const InputDecoration(labelText: 'App Port'),
+              decoration: const InputDecoration(
+                  labelText: 'App Port',
+                  labelStyle: TextStyle(color: Constants.highlightColor)),
+              style: const TextStyle(color: Constants.textColor),
             ),
             TextField(
               controller: _appOriginController,
-              decoration: const InputDecoration(labelText: 'App Origin'),
+              decoration: const InputDecoration(
+                  labelText: 'App Origin',
+                  labelStyle: TextStyle(color: Constants.highlightColor)),
+              style: const TextStyle(color: Constants.textColor),
             ),
             TextField(
               controller: _appRelayController,
-              decoration: const InputDecoration(labelText: 'App Relay'),
+              decoration: const InputDecoration(
+                  labelText: 'App Relay',
+                  labelStyle: TextStyle(color: Constants.highlightColor)),
+              style: const TextStyle(color: Constants.textColor),
             ),
+            Spacer(),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Constants.textColor,
+                foregroundColor: Constants.backColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
               onPressed: () async {
                 await saveSettings();
                 Navigator.pop(context);

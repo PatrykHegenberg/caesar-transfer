@@ -106,7 +106,7 @@ class SendScreenState extends State<SendScreen> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Constants.textColor,
-              foregroundColor: Constants.highlightColor,
+              foregroundColor: Constants.backColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),

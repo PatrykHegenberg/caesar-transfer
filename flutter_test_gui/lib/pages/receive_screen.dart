@@ -183,7 +183,7 @@ class ReceiveScreenState extends State<ReceiveScreen> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Constants.textColor,
-              foregroundColor: Constants.highlightColor,
+              foregroundColor: Constants.backColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
