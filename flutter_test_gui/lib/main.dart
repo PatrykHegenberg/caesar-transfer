@@ -6,6 +6,7 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter_test_gui/pages/settings_screen.dart';
 import 'package:flutter_test_gui/pages/send_screen.dart';
 import 'package:flutter_test_gui/pages/receive_screen.dart';
+import 'package:flutter_test_gui/consts/consts.dart';
 
 Future<void> main() async {
   await RustLib.init();
@@ -23,9 +24,9 @@ Future<void> main() async {
   }
 }
 
-const backColor = Color(0xFF32363E);
-const highlightColor = Color(0xFF98C379);
-const textColor = Color(0xFFABB2BF);
+// const backColor = Color(0xFF32363E);
+// const highlightColor = Color(0xFF98C379);
+// const textColor = Color(0xFFABB2BF);
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -73,13 +74,13 @@ class _MyHomePageState extends State<MyHomePage> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        backgroundColor: backColor,
+        backgroundColor: Constants.backColor,
         appBar: AppBar(
-          backgroundColor: const Color(0xFF282C34),
+          backgroundColor: const Color(0xFF292c3c), //0xFF282C34),
           centerTitle: true,
           title: Text(
             widget.title,
-            style: const TextStyle(color: textColor),
+            style: const TextStyle(color: Constants.textColor),
           ),
           actions: [
             PopupMenuButton<String>(
@@ -102,7 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         body: _screens[_selectedIndex],
         bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: const Color(0xFF282C34),
+          backgroundColor: const Color(0xFF292c3c), //0xFF282C34),
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.send),
@@ -114,8 +115,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
           currentIndex: _selectedIndex,
-          selectedItemColor: highlightColor,
-          unselectedItemColor: textColor,
+          selectedItemColor: Constants.highlightColor,
+          unselectedItemColor: Constants.textColor,
           onTap: _onItemTapped,
         ),
       ),

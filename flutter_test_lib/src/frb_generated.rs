@@ -120,13 +120,19 @@ fn wire_start_rust_receiver_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_filepath = <String>::sse_decode(&mut deserializer);
             let api_relay = <String>::sse_decode(&mut deserializer);
             let api_transfername = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
                 transform_result_sse(
                     (move || async move {
-                        crate::api::simple::start_rust_receiver(api_relay, api_transfername).await
+                        crate::api::simple::start_rust_receiver(
+                            api_filepath,
+                            api_relay,
+                            api_transfername,
+                        )
+                        .await
                     })()
                     .await,
                 )

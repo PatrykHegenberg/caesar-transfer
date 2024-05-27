@@ -46,19 +46,20 @@ pub async fn start_rust_sender(name: String, relay: String, files: Vec<String>) 
     Ok(())
 }
 
-// #[flutter_rust_bridge::frb(sync)]
-// pub async fn start_rust_receiver(relay: String, transfername: String) -> Result<()> {
-//     let outcome = start_receiver(relay.as_str(), transfername.as_str())
-//         .await
-//         .map_err(|e| anyhow!("Failed to start Caesar receiver: {}", e))?;
-//     println!("Result of receiver is: {:?}", outcome);
-//     Ok(())
-// }
-pub async fn start_rust_receiver(relay: String, transfername: String) -> Result<String> {
-    let outcome = start_receiver(relay.as_str(), transfername.as_str())
+pub async fn start_rust_receiver(
+    filepath: String,
+    relay: String,
+    transfername: String,
+) -> Result<String> {
+    // #[cfg(target_os = "android")]
+    let outcome = start_receiver(filepath, relay.as_str(), transfername.as_str())
         .await
         .map_err(|e| anyhow!("Failed to start Caesar receiver: {}", e))?;
 
+    // #[cfg(not(target_os = "android"))]
+    // let outcome = start_receiver(relay.as_str(), transfername.as_str())
+    //     .await
+    //     .map_err(|e| anyhow!("Failed to start Caesar receiver: {}", e))?;
     // Konvertieren Sie outcome zu einem String
     let outcome_string = format!("{:?}", outcome);
 

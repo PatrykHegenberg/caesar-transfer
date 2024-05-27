@@ -72,7 +72,10 @@ abstract class RustLibApi extends BaseApi {
   Future<void> initApp({dynamic hint});
 
   Future<String> startRustReceiver(
-      {required String relay, required String transfername, dynamic hint});
+      {required String filepath,
+      required String relay,
+      required String transfername,
+      dynamic hint});
 
   Future<void> startRustSender(
       {required String name,
@@ -138,10 +141,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @override
   Future<String> startRustReceiver(
-      {required String relay, required String transfername, dynamic hint}) {
+      {required String filepath,
+      required String relay,
+      required String transfername,
+      dynamic hint}) {
     return handler.executeNormal(NormalTask(
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(filepath, serializer);
         sse_encode_String(relay, serializer);
         sse_encode_String(transfername, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
@@ -152,7 +159,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         decodeErrorData: sse_decode_AnyhowException,
       ),
       constMeta: kStartRustReceiverConstMeta,
-      argValues: [relay, transfername],
+      argValues: [filepath, relay, transfername],
       apiImpl: this,
       hint: hint,
     ));
@@ -160,7 +167,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kStartRustReceiverConstMeta => const TaskConstMeta(
         debugName: "start_rust_receiver",
-        argNames: ["relay", "transfername"],
+        argNames: ["filepath", "relay", "transfername"],
       );
 
   @override

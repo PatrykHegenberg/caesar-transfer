@@ -18,6 +18,12 @@ Future<void> startRustSender(
         .startRustSender(name: name, relay: relay, files: files, hint: hint);
 
 Future<String> startRustReceiver(
-        {required String relay, required String transfername, dynamic hint}) =>
+        {required String filepath,
+        required String relay,
+        required String transfername,
+        dynamic hint}) =>
     RustLib.instance.api.startRustReceiver(
-        relay: relay, transfername: transfername, hint: hint);
+        filepath: filepath,
+        relay: relay,
+        transfername: transfername,
+        hint: hint);

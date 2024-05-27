@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test_gui/main.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -31,7 +32,8 @@ class ReceiveScreenState extends State<ReceiveScreen> {
           if (barcode.raw == null) {
             debugPrint('Failed to scan qr code');
           } else {
-            final String code = barcode.raw.toString();
+            final String code = barcode.barcodes.first.displayValue.toString();
+            print(code);
             setState(() {
               inputValue = code;
               _showScanner = false;
@@ -69,12 +71,20 @@ class ReceiveScreenState extends State<ReceiveScreen> {
 
   Future<void> _startTransfer(String appOrigin) async {
     final input = inputValue.trim();
+    String filePath = '';
     if (input.isNotEmpty) {
+      String? selectDirectory = await FilePicker.platform.getDirectoryPath();
+      if (selectDirectory == null) {
+        print("User doesnt choose a directory");
+      } else {
+        print("user choose: $selectDirectory");
+        filePath = selectDirectory;
+      }
       if (Platform.isAndroid) {
         if (await _requestPermission(Permission.manageExternalStorage)) {
           try {
-            final outcome =
-                await startRustReceiver(transfername: input, relay: appOrigin);
+            final outcome = await startRustReceiver(
+                filepath: filePath, transfername: input, relay: appOrigin);
             print('Ergebnis von Rust: $outcome');
           } catch (e) {
             print('Fehler beim Starten des Receivers: $e');
@@ -93,8 +103,8 @@ class ReceiveScreenState extends State<ReceiveScreen> {
         }
       } else {
         try {
-          final outcome =
-              await startRustReceiver(transfername: input, relay: appOrigin);
+          final outcome = await startRustReceiver(
+              filepath: filePath, transfername: input, relay: appOrigin);
           print('Ergebnis von Rust: $outcome');
         } catch (e) {
           print('Fehler beim Starten des Receivers: $e');
@@ -112,7 +122,7 @@ class ReceiveScreenState extends State<ReceiveScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backColor,
+      backgroundColor: Constants.backColor,
       body: Center(
           child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

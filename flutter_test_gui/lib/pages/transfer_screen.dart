@@ -58,9 +58,9 @@ class TransferScreenState extends State<TransferScreen> {
       //   } else {}
       // } else {
       try {
-        final outcome =
-            await startRustReceiver(transfername: input, relay: appOrigin);
-        print('Ergebnis von Rust: $outcome');
+        // final outcome =
+        //     await startRustReceiver(transfername: input, relay: appOrigin);
+        // print('Ergebnis von Rust: $outcome');
       } catch (e) {
         print('Fehler beim Starten des Receivers: $e');
       }

@@ -79,7 +79,12 @@ impl Args {
                 name,
             }) => {
                 println!("Receive for {name:?}");
-                receiver::start_receiver(relay.as_deref().unwrap_or(&cfg.app_origin), name).await;
+                receiver::start_receiver(
+                    ".".to_string(),
+                    relay.as_deref().unwrap_or(&cfg.app_origin),
+                    name,
+                )
+                .await;
             }
             Some(Commands::Serve {
                 port,
