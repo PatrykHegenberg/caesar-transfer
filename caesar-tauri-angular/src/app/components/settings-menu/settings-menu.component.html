@@ -1,0 +1,17 @@
+<div class="burger-menu">
+    <div class="burger-icon" (click)="toggleMenu()">
+        &#9776;
+    </div>
+    <div class="burger-menu-menu" [ngClass]="{'show': menuVisible}">
+        <h2>Einstellungen</h2>
+        <label for="variable1">Relayserver Address:</label>
+        <input type="text" id="variable1" [(ngModel)]="settings.relayServer">
+        
+        <label for="variable2">Port:</label>
+        <input type="number" id="variable2" [(ngModel)]="settings.port">
+
+        
+        <button class="save-button" (click)="saveSettings()">Save Settings</button>
+        <button class="reset-button" (click)="resetSettings()">Reset Settings</button>
+    </div>
+</div>

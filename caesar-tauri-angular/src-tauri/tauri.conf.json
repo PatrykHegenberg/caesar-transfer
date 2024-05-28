@@ -8,6 +8,7 @@
     "beforeBuildCommand": "npm run build",
     "frontendDist": "../dist/caesar-tauri-angular/browser"
   },
+
   "app": {"windows": [
       {
         "title": "caesar-tauri-angular",
@@ -16,7 +17,8 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;",
+      "capabilities": ["main-capability", "mobile-capability"]
     }
   },
   "bundle": {

@@ -8,7 +8,7 @@ android {
     compileSdk = 33
     namespace = "com.tauri.caesar_tauri_angular"
     defaultConfig {
-        manifestPlaceholders["usesCleartextTraffic"] = "false"
+        manifestPlaceholders["usesCleartextTraffic"] = "true"
         applicationId = "com.tauri.caesar_tauri_angular"
         minSdk = 24
         targetSdk = 33

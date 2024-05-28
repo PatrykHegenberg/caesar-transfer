@@ -2,11 +2,11 @@
 <h2>Sender</h2>
 <p>Hier können Sie Dateien senden.</p>
 
-<div *ngIf="!sendingInProgress && !sendingSuccess" class="form-group">
+<div *ngIf="!sendingInProgress && !sendingSuccess && !isRelayServerSet" class="form-group">
   <label for="relayAddress">Relay Server Adresse:</label>
   <input type="text" id="relayAddress" [(ngModel)]="relayAddress" placeholder="::1">
 </div>
-<div *ngIf="!sendingInProgress && !sendingSuccess" class="form-group">
+<div *ngIf="!sendingInProgress && !sendingSuccess && !isPortSet" class="form-group">
   <label for="relayPort">Port:</label>
   <input type="text" id="relayPort" [(ngModel)]="relayPort" placeholder="8000">
 </div>
@@ -22,7 +22,7 @@
 <div *ngIf="!sendingInProgress && !sendingSuccess" class="form-group">
   <button (click)="sendData()" [disabled]="sendingInProgress">Daten senden</button>
 </div>
-<div class="form-group">
+<div *ngIf="!sendingInProgress && !sendingSuccess" class="form-group">
   <button (click)="redirectToHome()">Startseite</button>
 </div>
 <div *ngIf="sendingInProgress">
@@ -33,7 +33,7 @@
   <p>Data sent successfully! Transfer Name: {{ transferName }}</p>
 </div>
 
-<div *ngIf="!sendingInProgress && !sendingSuccess && transferName === null">
+<div *ngIf="!sendingInProgress && !sendingSuccess && transferName === ''">
   <p>No data being sent.</p>
 </div>
 
