@@ -25,62 +25,185 @@ const NONCE_SIZE: usize = 12;
 #[cfg(target_os = "android")]
 const FILE_PATH_PREFIX: &str = "/storage/emulated/0/Download";
 
+
+/// Represents a file to be transferred.
+///
+/// # Fields
+///
+/// - `name`: The name of the file.
+/// - `size`: The total size of the file in bytes.
+/// - `progress`: The number of bytes that have been transferred so far.
+/// - `handle`: The file handle for reading and writing the file.
+#[derive(Debug)]
 struct File {
+    /// The name of the file.
     name: String,
+
+    /// The total size of the file in bytes.
     size: u64,
+
+    /// The number of bytes that have been transferred so far.
     progress: u64,
+
+    /// The file handle for reading and writing the file.
     handle: fs::File,
 }
 
+
+/// Represents the state of the receiver.
+///
+/// # Fields
+///
+/// - `hmac`: The HMAC key used for authentication.
+/// - `sender`: The sender used for sending packets.
+/// - `key`: The ephemeral secret key used for key agreement.
+/// - `shared_key`: The shared key used for encryption.
+/// - `files`: The list of files being transferred.
+/// - `sequence`: The sequence number of the last received packet.
+/// - `index`: The index of the current file being transferred.
+/// - `progress`: The number of bytes transferred so far.
+/// - `length`: The total length of the file being transferred.
 struct Context {
+    /// The HMAC key used for authentication.
     hmac: Vec<u8>,
+
+    /// The sender used for sending packets.
     sender: Sender,
+
+    /// The ephemeral secret key used for key agreement.
     key: EphemeralSecret,
+
+    /// The shared key used for encryption.
     shared_key: Option<Aes128Gcm>,
+
+    /// The list of files being transferred.
     files: Vec<File>,
+
+    /// The sequence number of the last received packet.
     sequence: u32,
+
+    /// The index of the current file being transferred.
     index: usize,
+
+    /// The number of bytes transferred so far.
     progress: u64,
+
+    /// The total length of the file being transferred.
     length: u64,
 }
 
+
+/// Handle the join room packet.
+///
+/// # Arguments
+///
+/// * `size` - The size of the room.
+///
+/// # Returns
+///
+/// A `Status` representing the result of the operation.
+///
+/// # Errors
+///
+/// Returns an error if the join room packet is invalid.
 fn on_join_room(size: Option<usize>) -> Status {
+    // Check if the size of the room is provided
     if size.is_none() {
+        // Return an error if the join room packet is invalid
         return Status::Err("Invalid join room packet.".into());
     }
 
+    // Print a message indicating that the client has successfully connected to the room
     println!("Connected to room.");
 
+    // Return a continue status to indicate that the operation was successful
     Status::Continue()
 }
 
+
+/// Handle the error packet.
+///
+/// # Arguments
+///
+/// * `message` - The error message.
+///
+/// # Returns
+///
+/// A `Status` representing the result of the operation.
+///
+/// # Errors
+///
+/// Returns an error with the provided error message.
 fn on_error(message: String) -> Status {
+    // Return an error with the provided error message
     Status::Err(message)
 }
 
+
+/// Handle the leave room packet.
+///
+/// # Arguments
+///
+/// * `context` - The receiver context.
+/// * `_` - The index of the sender. Currently unused.
+///
+/// # Returns
+///
+/// A `Status` representing the result of the operation.
+///
+/// # Errors
+///
+/// Returns an error if there are still files being transferred.
 fn on_leave_room(context: &mut Context, _: usize) -> Status {
+    // Check if there are any files being transferred with less than 100% progress
     if context.files.iter().any(|file| file.progress < 100) {
+        // Print a message indicating that the transfer was interrupted because the host left the room
         println!();
         println!("Transfer was interrupted because the host left the room.");
 
+        // Return an error with the provided message
         Status::Err("Transfer was interrupted because the host left the room.".into())
     } else {
+        // Return an exit status to indicate that the operation was successful
         Status::Exit()
     }
 }
 
+
+/// Handle the list packet.
+///
+/// # Arguments
+///
+/// * `filepath` - The path to the directory where the files will be saved.
+/// * `context` - The receiver context.
+/// * `list` - The list packet containing the files to be transferred.
+///
+/// # Returns
+///
+/// A `Status` representing the result of the operation.
+///
+/// # Errors
+///
+/// Returns an error if the list packet is invalid or if a file with the same name already exists.
 fn on_list(filepath: String, context: &mut Context, list: ListPacket) -> Status {
+    // Check if the shared key is established
     if context.shared_key.is_none() {
         return Status::Err("Invalid list packet: no shared key established".into());
     }
 
+    // Iterate over the entries in the list packet
     for entry in list.entries {
+        // Sanitize the filename to prevent directory traversal attacks
         let path = sanitize_filename::sanitize(entry.name.clone());
+        // Construct the file path
         let file_path = format!("{}/{}", filepath, path);
 
+        // Check if the file already exists
         if Path::new(&file_path).exists() {
             return Status::Err(format!("The file '{}' already exists.", path));
         }
+
+        // Create a new file
         let handle = match fs::File::create(&file_path) {
             Ok(handle) => handle,
             Err(error) => {
@@ -91,6 +214,7 @@ fn on_list(filepath: String, context: &mut Context, list: ListPacket) -> Status 
             }
         };
 
+        // Create a new file object and add it to the context
         let file = File {
             name: entry.name,
             size: entry.size,
@@ -101,6 +225,7 @@ fn on_list(filepath: String, context: &mut Context, list: ListPacket) -> Status 
         context.files.push(file);
     }
 
+    // Reset the context for the next file transfer
     context.index = 0;
     context.progress = 0;
     context.sequence = 0;
@@ -109,11 +234,28 @@ fn on_list(filepath: String, context: &mut Context, list: ListPacket) -> Status 
     Status::Continue()
 }
 
+/// Handle a chunk packet.
+///
+/// This function is responsible for processing chunk packets received from the sender.
+/// It checks if the shared key has been established, verifies the sequence number,
+/// writes the chunk to the corresponding file, updates the file's progress, sends progress
+/// updates if necessary, and handles the end of a file transfer.
+///
+/// # Arguments
+///
+/// * `context` - The receiver context.
+/// * `chunk` - The chunk packet received from the sender.
+///
+/// # Returns
+///
+/// A status indicating if the operation was successful.
 fn on_chunk(context: &mut Context, chunk: ChunkPacket) -> Status {
+    // Check if the shared key is established
     if context.shared_key.is_none() {
         return Status::Err("Invalid chunk packet: no shared key established".into());
     }
 
+    // Verify the sequence number
     if chunk.sequence != context.sequence {
         return Status::Err(format!(
             "Expected sequence {}, but got {}.",
@@ -121,18 +263,24 @@ fn on_chunk(context: &mut Context, chunk: ChunkPacket) -> Status {
         ));
     }
 
+    // Get the file corresponding to the current index
     let Some(file) = context.files.get_mut(context.index) else {
         return Status::Err("Invalid file index.".into());
     };
 
+    // Update the file's length
     context.length += chunk.chunk.len() as u64;
 
+    // Increment the sequence number
     context.sequence += 1;
 
+    // Write the chunk to the file
     file.handle.write(&chunk.chunk).unwrap();
 
+    // Update the file's progress
     file.progress = (context.length * 100) / file.size;
 
+    // Send progress updates if necessary
     if file.progress == 100 || file.progress - context.progress >= 1 || chunk.sequence == 0 {
         context.progress = file.progress;
 
@@ -151,6 +299,7 @@ fn on_chunk(context: &mut Context, chunk: ChunkPacket) -> Status {
         std::io::Write::flush(&mut stdout()).unwrap();
     }
 
+    // Handle the end of a file transfer
     if file.size == context.length {
         context.index += 1;
         context.length = 0;
@@ -163,59 +312,104 @@ fn on_chunk(context: &mut Context, chunk: ChunkPacket) -> Status {
     Status::Continue()
 }
 
+/// Handle the handshake packet.
+///
+/// This function is responsible for handling the handshake packet received from the sender.
+/// It performs the necessary verification and establishes the shared key between the sender and receiver.
+///
+/// # Arguments
+///
+/// * `context` - The receiver context.
+/// * `handshake` - The handshake packet received from the sender.
+///
+/// # Returns
+///
+/// A `Status` representing the result of the operation.
 fn on_handshake(context: &mut Context, handshake: HandshakePacket) -> Status {
+    // Check if the shared key is already established
     if context.shared_key.is_some() {
         return Status::Err("Already performed handshake.".into());
     }
 
+    // Create a HMAC instance using the shared key
     let mut mac = Hmac::<Sha256>::new_from_slice(&context.hmac).unwrap();
 
+    // Update the HMAC with the sender's public key
     mac.update(&handshake.public_key);
 
+    // Verify the signature using the HMAC
     let verification = mac.verify_slice(&handshake.signature);
     if verification.is_err() {
         return Status::Err("Invalid signature from the sender.".into());
     }
 
+    // Generate the receiver's public key
     let public_key = context.key.public_key().to_sec1_bytes().into_vec();
 
+    // Create a new HMAC instance using the shared key
     let mut mac = Hmac::<Sha256>::new_from_slice(&context.hmac).unwrap();
 
+    // Update the HMAC with the receiver's public key
     mac.update(&public_key);
 
+    // Generate the signature using the HMAC
     let signature = mac.finalize().into_bytes().to_vec();
+
+    // Convert the sender's public key into a `PublicKey` object
     let shared_public_key = PublicKey::from_sec1_bytes(&handshake.public_key).unwrap();
 
+    // Perform Diffie-Hellman key exchange
     let shared_secret = context.key.diffie_hellman(&shared_public_key);
     let shared_secret = shared_secret.raw_secret_bytes();
     let shared_secret = &shared_secret[0..16];
 
+    // Create a new 128-bit AES-GCM key from the shared secret
     let shared_key: &Key<Aes128Gcm> = shared_secret.into();
     let shared_key = <Aes128Gcm as aes_gcm::KeyInit>::new(shared_key);
 
+    // Create the handshake response packet
     let handshake_response = HandshakeResponsePacket {
         public_key,
         signature,
     };
 
+    // Send the handshake response packet to the sender
     context
         .sender
         .send_packet(DESTINATION, Value::HandshakeResponse(handshake_response));
 
+    // Establish the shared key
     context.shared_key = Some(shared_key);
 
     Status::Continue()
 }
 
+/// Handle a message received from the WebSocket connection.
+///
+/// This function takes a `filepath` string, a mutable reference to a `Context` struct,
+/// and a `WebSocketMessage` enum. It returns a `Status` enum.
+///
+/// # Arguments
+///
+/// * `filepath` - A string representing the file path.
+/// * `context` - A mutable reference to a `Context` struct.
+/// * `message` - A `WebSocketMessage` enum.
+///
+/// # Returns
+///
+/// A `Status` enum.
 fn on_message(filepath: String, context: &mut Context, message: WebSocketMessage) -> Status {
+    // Handle text messages
     match message.clone() {
         WebSocketMessage::Text(text) => {
+            // Parse the JSON packet
             let packet = match serde_json::from_str(&text) {
                 Ok(packet) => packet,
                 Err(_) => {
                     return Status::Continue();
                 }
             };
+            // Handle different types of JSON packets
             return match packet {
                 JsonPacketResponse::Join { size } => on_join_room(size),
                 JsonPacketResponse::Leave { index } => on_leave_room(context, index),
@@ -223,7 +417,9 @@ fn on_message(filepath: String, context: &mut Context, message: WebSocketMessage
                 _ => Status::Err(format!("Unexpected json packet: {:?}", packet)),
             };
         }
+        // Handle binary messages
         WebSocketMessage::Binary(data) => {
+            // Extract the data from the binary message
             let data = &data[1..];
 
             let data = if let Some(shared_key) = &context.shared_key {
@@ -235,8 +431,10 @@ fn on_message(filepath: String, context: &mut Context, message: WebSocketMessage
                 data.to_vec()
             };
 
+            // Decode the packet
             let packet = Packet::decode(data.as_ref()).unwrap();
             let value = packet.value.unwrap();
+            // Handle different types of packets
             return match value {
                 Value::List(list) => on_list(filepath, context, list),
                 Value::Chunk(chunk) => on_chunk(context, chunk),
@@ -247,9 +445,26 @@ fn on_message(filepath: String, context: &mut Context, message: WebSocketMessage
         _ => (),
     }
 
+    // Return an error status for invalid message types
     Status::Err("Invalid message type".into())
 }
 
+ 
+/// Starts the receiver's client.
+///
+/// This function takes in a file path, a socket, and a fragment string. It
+/// then extracts the room ID and HMAC from the fragment string. The function
+/// also generates an ephemeral secret key.
+///
+/// The function initializes a `Context` struct with the extracted information
+/// and sets up the necessary communication channels. It then sends a join
+/// request to the server and starts handling incoming messages.
+///
+/// # Arguments
+///
+/// * `filepath` - The path to the file to be received.
+/// * `socket` - The WebSocket connection to the server.
+/// * `fragment` - The invite code containing the room ID and HMAC.
 pub async fn start(filepath: String, socket: Socket, fragment: &str) {
     let Some(index) = fragment.rfind('-') else {
         println!("Error: The invite code '{}' is not valid.", fragment);

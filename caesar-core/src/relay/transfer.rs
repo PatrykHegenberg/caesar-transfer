@@ -1,13 +1,31 @@
 use serde::{Deserialize, Serialize};
 
+/// Request to transfer a connection from one relay to another
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct TransferRequest {
+    /// The name of the client
     pub name: String,
+    /// The IP address of the client
     pub ip: String,
+    /// The local room ID of the client
     pub local_room_id: String,
+    /// The relay room ID of the client
     pub relay_room_id: String,
 }
+
 impl TransferRequest {
+    /// Creates a new transfer request
+    ///
+    /// # Args
+    ///
+    /// * `name` - The name of the client
+    /// * `ip` - The IP address of the client
+    /// * `local_room_id` - The local room ID of the client
+    /// * `relay_room_id` - The relay room ID of the client
+    ///
+    /// # Returns
+    ///
+    /// A new `TransferRequest` instance
     pub fn new(name: String, ip: String, local_room_id: String, relay_room_id: String) -> Self {
         Self {
             name,
@@ -18,15 +36,32 @@ impl TransferRequest {
     }
 }
 
+/// Response containing the details of the transferred connection
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct TransferResponse {
+    /// The name of the client
     pub name: String,
+    /// The IP address of the client
     pub ip: String,
+    /// The local room ID of the client
     pub local_room_id: String,
+    /// The relay room ID of the client
     pub relay_room_id: String,
 }
 
 impl TransferResponse {
+    /// Creates a new transfer response
+    ///
+    /// # Args
+    ///
+    /// * `name` - The name of the client
+    /// * `ip` - The IP address of the client
+    /// * `local_room_id` - The local room ID of the client
+    /// * `relay_room_id` - The relay room ID of the client
+    ///
+    /// # Returns
+    ///
+    /// A new `TransferResponse` instance
     pub fn new(name: String, ip: String, local_room_id: String, relay_room_id: String) -> Self {
         Self {
             name,
