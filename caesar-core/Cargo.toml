@@ -1,6 +1,6 @@
 [package]
 name = "caesar-core"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2021"
 build = "src/build.rs"
 authors = ["Manuel Keidel", "Patryk Hegenberg", "Krzysztof Stankiewicz"]
@@ -47,17 +47,7 @@ reqwest = { version = "0.12.4", default-features = false, features = [
   "rustls-tls",
 ] }
 hex = "0.4.3"
-# rinf = "6.8.0"
 anyhow = "1.0.83"
-# [target.armv7-linux-androideabi.dependencies]
-# openssl = { version = "*", features = ["vendored"] }
-# openssl-sys = { version = "0.9.102", features = ["vendored"] }
-# [target.aarch64-linux-android.dependencies]
-# openssl = { version = "*", features = ["vendored"] }
-# openssl-sys = { version = "0.9.102", features = ["vendored"] }
-# [target.x86_64-linux-android.dependencies]
-# openssl = { version = "*", features = ["vendored"] }
-# openssl-sys = { version = "0.9.102", features = ["vendored"] }
 
 [build-dependencies]
 prost-build = "0.12.4"

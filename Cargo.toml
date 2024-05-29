@@ -1,12 +1,3 @@
 [workspace]
 resolver = "2"
-members = [
-  "caesar-cli",
-  "caesar-core",
-  "caesar-desktop",
-  "caesar-mobile",
-  "caesar-shuttle",
-  "caesar-tui",
-  # "flutter_gui",
-  "flutter_test_lib"
-]
+members = ["caesar-cli", "caesar-core", "caesar-shuttle", "flutter_test_lib"]

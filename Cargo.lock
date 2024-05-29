@@ -454,7 +454,7 @@ checksum = "514de17de45fdb8dc022b1a7975556c53c86f9f0aa5f534b98977b171857c2c9"
 
 [[package]]
 name = "caesar-cli"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "axum 0.7.5",
  "axum-client-ip",
@@ -472,7 +472,7 @@ dependencies = [
 
 [[package]]
 name = "caesar-core"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "aes-gcm",
  "anyhow",
@@ -511,35 +511,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "caesar-desktop"
-version = "0.0.1"
-dependencies = [
- "caesar-core",
-]
-
-[[package]]
-name = "caesar-mobile"
-version = "0.0.1"
-dependencies = [
- "caesar-core",
-]
-
-[[package]]
 name = "caesar-transfer-iu"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "axum 0.7.5",
  "axum-client-ip",
  "caesar-core",
  "shuttle-axum",
  "shuttle-runtime",
-]
-
-[[package]]
-name = "caesar-tui"
-version = "0.0.1"
-dependencies = [
- "caesar-core",
 ]
 
 [[package]]
