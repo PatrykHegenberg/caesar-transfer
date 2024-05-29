@@ -17,7 +17,7 @@ export class ReceiverComponent implements OnInit {
   relayPort?: number;
   transferName: string = '';
   isRelayServerSet = false;
-  isPortSet = false;
+  isUsingShuttle = false;
   isReceiving = false;
   receiveSuccess = false;
   constructor(private tauriService: TauriService, private router: Router, private storage: StorageService) {}
@@ -25,12 +25,13 @@ export class ReceiverComponent implements OnInit {
     if(this.storage.getLocalEntry('relayServer')) {
       this.isRelayServerSet = true;
       this.relayAddress = this.storage.getLocalEntry('relayServer')
-    }
     if(this.storage.getLocalEntry('port')) {
-      this.isPortSet = true;
-      this.relayPort = this.storage.getLocalEntry('port')
+    this.relayPort = this.storage.getLocalEntry('port')
     }
-    console.log("Moin")
+    if(this.storage.getLocalEntry('relayServer') === 'wss://caesar-transfer-iu.shuttleapp.rs') {
+        this.isUsingShuttle = true;
+      }
+    }
 }
   redirectToHome() {
     this.router.navigate([''])
@@ -41,7 +42,11 @@ export class ReceiverComponent implements OnInit {
     this.transferName = '';
   }
   getRelayURL(): string {
+    if(!this.isUsingShuttle) {
     return `ws://${this.relayAddress}:${this.relayPort}`;
+    } else {
+      return `${this.relayAddress}`
+    } 
   }
   receiveData() {
     const relay = this.getRelayURL();

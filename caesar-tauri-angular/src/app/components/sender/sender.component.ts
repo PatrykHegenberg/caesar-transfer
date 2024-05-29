@@ -22,23 +22,24 @@ export class SenderComponent implements OnInit {
   sendingInProgress = false;
   sendingSuccess = false;
   isRelayServerSet = false;
-  isPortSet = false;
+  isUsingShuttle = false;
   transferName: string = "";
   constructor(private tauriService: TauriService, private router: Router, private cdr: ChangeDetectorRef, private storage: StorageService) {
     this.listenToTransferEvents();
   }
 
   ngOnInit(): void {
-      if(this.storage.getLocalEntry('relayServer')) {
-        this.isRelayServerSet = true;
-        this.relayAddress = this.storage.getLocalEntry('relayServer')
+    if(this.storage.getLocalEntry('relayServer')) {
+      this.isRelayServerSet = true;
+      this.relayAddress = this.storage.getLocalEntry('relayServer')
+    if(this.storage.getLocalEntry('port')) {
+    this.relayPort = this.storage.getLocalEntry('port')
+    }
+    if(this.storage.getLocalEntry('relayServer') === 'wss://caesar-transfer-iu.shuttleapp.rs') {
+        this.isUsingShuttle = true;
       }
-      if(this.storage.getLocalEntry('port')) {
-        this.isPortSet = true;
-        this.relayPort = this.storage.getLocalEntry('port')
-      }
-    console.log("Moin")
-  }
+    }
+}
 
   redirectToHome() {
     this.router.navigate([''])
@@ -69,10 +70,14 @@ export class SenderComponent implements OnInit {
   }
   
 
-  getRelayURL(): string {
-    return `ws://${this.relayAddress}:${this.relayPort}`;
-  }
 
+  getRelayURL(): string {
+    if(!this.isUsingShuttle) {
+    return `ws://${this.relayAddress}:${this.relayPort}`;
+    } else {
+      return `${this.relayAddress}`
+    } 
+  }
   sendData() {
     const relay = this.getRelayURL();
     if (this.files.length > 0) {

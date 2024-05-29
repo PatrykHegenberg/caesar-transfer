@@ -17,6 +17,7 @@ export class SettingsMenuComponent implements OnInit {
   settings = {
     relayServer: '',
     port: 0,
+    useShuttleServer: false
   };
 
   ngOnInit(): void {
@@ -26,6 +27,9 @@ export class SettingsMenuComponent implements OnInit {
       if(this.storage.getLocalEntry('port')) {
         this.settings.port = this.storage.getLocalEntry('port');
       }
+      if(this.storage.getLocalEntry('useShuttleServer') === true) {
+        this.settings.useShuttleServer = true;
+      }
   }
 
   toggleMenu(): void {
@@ -33,8 +37,13 @@ export class SettingsMenuComponent implements OnInit {
   }
 
   saveSettings(): void {
+    if(this.settings.useShuttleServer === true) {
+      this.storage.setLocalEntry('relayServer', 'wss://caesar-transfer-iu.shuttleapp.rs')
+      this.storage.setLocalEntry('useShuttleServer', this.settings.useShuttleServer)
+    } else {
     this.storage.setLocalEntry('relayServer', this.settings.relayServer)
     this.storage.setLocalEntry('port', this.settings.port)
+    }
     alert("The settings have been saved!");
     this.menuVisible = !this.menuVisible;
   }

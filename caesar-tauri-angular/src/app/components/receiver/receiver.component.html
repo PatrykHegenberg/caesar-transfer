@@ -2,10 +2,10 @@
 <p>Here you can receive Data</p>
 
 <div *ngIf="!isReceiving&& !receiveSuccess && !isRelayServerSet" class="form-group">
-  <label for="relayAddress">Relay Server Adresse:</label>
+  <label for="relayAddress">Relay Server Address:</label>
   <input type="text" id="relayAddress" [(ngModel)]="relayAddress" placeholder="::1">
 </div>
-<div *ngIf="!isReceiving&& !receiveSuccess && !isPortSet" class="form-group">
+<div *ngIf="!isReceiving&& !receiveSuccess && !isRelayServerSet" class="form-group">
   <label for="relayPort">Port:</label>
   <input type="text" id="relayPort" [(ngModel)]="relayPort" placeholder="8000">
 </div>
@@ -16,10 +16,14 @@
   </div>
 
 <div *ngIf="!isReceiving&& !receiveSuccess" class="form-group">
-  <button (click)="receiveData()">Daten empfangen</button>
+  <button (click)="receiveData()">Receive Data</button>
 </div>
 <div *ngIf="!isReceiving&& !receiveSuccess" class="form-group">
-  <button (click)="redirectToHome()">Startseite</button>
+  <button (click)="redirectToHome()">Home</button>
+</div>
+
+<div *ngIf="isReceiving" class="form-group">
+  <button class="cancel-button" (click)="reset()">Cancel</button>
 </div>
 
 <div>

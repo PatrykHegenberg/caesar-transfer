@@ -43,12 +43,11 @@ body {
 
 .burger-menu {
     position: relative;
-    width: 100%;
 }
 
 .burger-icon {
-    font-size: 30px;
     cursor: pointer;
+    font-size: 24px;
 }
 
 .burger-menu-menu {
@@ -56,66 +55,52 @@ body {
     position: absolute;
     top: 40px;
     left: 0;
-    background-color: white;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
-    width: 250px;
-    padding: 16px;
-    border-radius: 8px;
-    box-sizing: border-box;
+    background: rgb(118, 118, 118);
+    border: 1px solid #8a8989;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
 }
 
 .burger-menu-menu.show {
     display: block;
 }
 
-.burger-menu-menu h2 {
-    margin-top: 0;
-    color: #333;
+.checkbox-container {
+    margin-bottom: 20px;
 }
 
-.burger-menu-menu label, .burger-menu-menu input, .burger-menu-menu select {
+.checkbox-container input {
+    margin-right: 10px;
+}
+
+label {
     display: block;
-    width: 100%;
     margin-bottom: 10px;
+}
+
+input[type="text"],
+input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 20px;
     box-sizing: border-box;
 }
 
-.burger-menu-menu label {
-    color: #333;
-}
-
-.burger-menu-menu input, .burger-menu-menu select {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+button {
+    padding: 10px 15px;
+    margin-right: 10px;
+    cursor: pointer;
 }
 
 .save-button {
-    width: 100%;
-    padding: 10px;
     background-color: #4CAF50;
-    color: #fff;
+    color: rgb(255, 255, 255);
     border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.save-button:hover {
-    background-color: #45a049;
 }
 
 .reset-button {
-    padding-top: 2rem;
-    width: 100%;
-    padding: 10px;
-    background-color: #ff0000;
-    color: #fff;
+    background-color: #f44336;
+    color: white;
     border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.reset-button:hover {
-    background-color: #da1e1e;
 }

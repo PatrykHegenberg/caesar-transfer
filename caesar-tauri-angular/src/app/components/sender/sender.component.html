@@ -6,7 +6,7 @@
   <label for="relayAddress">Relay Server Adresse:</label>
   <input type="text" id="relayAddress" [(ngModel)]="relayAddress" placeholder="::1">
 </div>
-<div *ngIf="!sendingInProgress && !sendingSuccess && !isPortSet" class="form-group">
+<div *ngIf="!sendingInProgress && !sendingSuccess && !isRelayServerSet" class="form-group">
   <label for="relayPort">Port:</label>
   <input type="text" id="relayPort" [(ngModel)]="relayPort" placeholder="8000">
 </div>
@@ -25,6 +25,11 @@
 <div *ngIf="!sendingInProgress && !sendingSuccess" class="form-group">
   <button (click)="redirectToHome()">Startseite</button>
 </div>
+
+<div *ngIf="sendingInProgress" class="form-group">
+  <button class="cancel-button" (click)="reset()">Cancel</button>
+</div>
+
 <div *ngIf="sendingInProgress">
   <p>Sending files... Transfer Name: {{ transferName }}</p>
 </div>
