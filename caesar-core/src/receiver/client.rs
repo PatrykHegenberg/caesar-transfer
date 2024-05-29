@@ -22,6 +22,9 @@ use tracing::error;
 const DESTINATION: u8 = 0;
 const NONCE_SIZE: usize = 12;
 
+#[cfg(target_os = "android")]
+const FILE_PATH_PREFIX: &str = "/storage/emulated/0/Download";
+
 struct File {
     name: String,
     size: u64,
