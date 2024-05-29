@@ -275,7 +275,7 @@ fn on_message(
             };
             return match packet {
                 JsonPacketResponse::Create { id } => {
-                   on_create_room(context, id, relay, transfer_name, is_local) 
+                    on_create_room(context, id, relay, transfer_name, is_local)
                 }
                 JsonPacketResponse::Join { size } => on_join_room(context, size),
                 JsonPacketResponse::Leave { index } => on_leave_room(context, index),
@@ -303,7 +303,7 @@ fn on_message(
                 }
                 Value::Progress(progress) => on_progress(context, progress),
                 _ => Status::Err(format!("Unexpected packet: {:?}", value)),
-            }
+            };
         }
         _ => (),
     }

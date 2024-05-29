@@ -2,6 +2,7 @@ pub mod client;
 pub mod http_client;
 
 use crate::{receiver::client as receiver, sender::util::replace_protocol};
+use anyhow::{anyhow, Result};
 
 use tokio_tungstenite::{
     connect_async,
@@ -9,7 +10,7 @@ use tokio_tungstenite::{
 };
 use tracing::{debug, error};
 
-pub async fn start_receiver(relay: &str, name: &str) {
+pub async fn start_receiver(filepath: String, relay: &str, name: &str) -> Result<()> {
     let http_url = replace_protocol(relay);
     let res = http_client::download_info(http_url.as_str(), name)
         .await
@@ -17,25 +18,37 @@ pub async fn start_receiver(relay: &str, name: &str) {
     debug!("Got room_id from Server: {:?}", res);
     let res_ip = String::from("ws://") + res.ip.as_str() + ":9000";
 
-    if let Err(local_err) = start_ws_com(res_ip.as_str(), res.local_room_id.as_str()).await {
+    #[cfg(not(target_os = "android"))]
+    if let Err(local_err) = start_ws_com(
+        filepath.clone(),
+        res_ip.as_str(),
+        res.local_room_id.as_str(),
+    )
+    .await
+    {
         debug!("Failed to connect local: {local_err}");
-        if let Err(relay_err) = start_ws_com(relay, res.relay_room_id.as_str()).await {
+        if let Err(relay_err) = start_ws_com(filepath, relay, res.relay_room_id.as_str()).await {
             debug!("Failed to connect remote: {relay_err}");
         }
     }
-    let success = http_client::download_success(http_url.as_str(), name).await;
-    match success {
-        Ok(()) => debug!("Success"),
-        Err(e) => error!("Error: {e:?}"),
-    };
+
+    #[cfg(target_os = "android")]
+    if let Err(relay_err) = start_ws_com(filepath, relay, res.relay_room_id.as_str()).await {
+        debug!("Failed to connect remote: {relay_err}");
+    }
+    http_client::download_success(http_url.as_str(), name)
+        .await
+        .map_err(|e| anyhow!("Failed to download success: {}", e))?;
+
+    debug!("Success");
+    Ok(())
 }
 
-pub async fn start_ws_com(relay: &str, name: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn start_ws_com(filepath: String, relay: &str, name: &str) -> Result<()> {
     let url = String::from(relay) + "/ws";
-    let Ok(mut request) = url.into_client_request() else {
-        println!("Error: Failed to create request.");
-        return Err("Failed to create request".into());
-    };
+    let mut request = url
+        .into_client_request()
+        .map_err(|e| anyhow!("Failed to create request: {}", e))?;
 
     request
         .headers_mut()
@@ -47,7 +60,7 @@ pub async fn start_ws_com(relay: &str, name: &str) -> Result<(), Box<dyn std::er
         .await
     {
         Ok(Ok((socket, _))) => {
-            receiver::start(socket, name).await;
+            receiver::start(filepath, socket, name).await;
             Ok(())
         }
         Ok(Err(e)) => {

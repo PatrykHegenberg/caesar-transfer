@@ -69,42 +69,24 @@ fn on_leave_room(context: &mut Context, _: usize) -> Status {
     }
 }
 
-fn on_list(context: &mut Context, list: ListPacket) -> Status {
+fn on_list(filepath: String, context: &mut Context, list: ListPacket) -> Status {
     if context.shared_key.is_none() {
         return Status::Err("Invalid list packet: no shared key established".into());
     }
 
     for entry in list.entries {
         let path = sanitize_filename::sanitize(entry.name.clone());
-        #[cfg(target_os = "android")]
-        let file_path = format!("{}/{}", FILE_PATH_PREFIX, path);
+        let file_path = format!("{}/{}", filepath, path);
 
-        #[cfg(target_os = "android")]
         if Path::new(&file_path).exists() {
             return Status::Err(format!("The file '{}' already exists.", path));
         }
-        #[cfg(target_os = "android")]
         let handle = match fs::File::create(&file_path) {
             Ok(handle) => handle,
             Err(error) => {
                 return Status::Err(format!(
                     "Error: Failed to create file '{}': {}",
                     file_path, error
-                ));
-            }
-        };
-        #[cfg(not(target_os = "android"))]
-        if Path::new(&path).exists() {
-            return Status::Err(format!("The file '{}' already exists.", path));
-        }
-        
-        #[cfg(not(target_os = "android"))]
-        let handle = match fs::File::create(&path) {
-            Ok(handle) => handle,
-            Err(error) => {
-                return Status::Err(format!(
-                    "Error: Failed to create file '{}': {}",
-                    path, error
                 ));
             }
         };
@@ -225,7 +207,7 @@ fn on_handshake(context: &mut Context, handshake: HandshakePacket) -> Status {
     Status::Continue()
 }
 
-fn on_message(context: &mut Context, message: WebSocketMessage) -> Status {
+fn on_message(filepath: String, context: &mut Context, message: WebSocketMessage) -> Status {
     match message.clone() {
         WebSocketMessage::Text(text) => {
             let packet = match serde_json::from_str(&text) {
@@ -256,7 +238,7 @@ fn on_message(context: &mut Context, message: WebSocketMessage) -> Status {
             let packet = Packet::decode(data.as_ref()).unwrap();
             let value = packet.value.unwrap();
             return match value {
-                Value::List(list) => on_list(context, list),
+                Value::List(list) => on_list(filepath, context, list),
                 Value::Chunk(chunk) => on_chunk(context, chunk),
                 Value::Handshake(handshake) => on_handshake(context, handshake),
                 _ => Status::Err(format!("Unexpected packet: {:?}", value)),
@@ -268,7 +250,7 @@ fn on_message(context: &mut Context, message: WebSocketMessage) -> Status {
     Status::Err("Invalid message type".into())
 }
 
-pub async fn start(socket: Socket, fragment: &str) {
+pub async fn start(filepath: String, socket: Socket, fragment: &str) {
     let Some(index) = fragment.rfind('-') else {
         println!("Error: The invite code '{}' is not valid.", fragment);
         return;
@@ -309,7 +291,7 @@ pub async fn start(socket: Socket, fragment: &str) {
 
     let outgoing_handler = receiver.stream().map(Ok).forward(outgoing);
     let incoming_handler = incoming.try_for_each(|message| {
-        match on_message(&mut context, message) {
+        match on_message(filepath.clone(), &mut context, message) {
             Status::Exit() => {
                 context.sender.send_json_packet(JsonPacket::Leave);
                 println!("Transfer has completed.");
@@ -331,6 +313,7 @@ pub async fn start(socket: Socket, fragment: &str) {
 
     future::select(incoming_handler, outgoing_handler).await;
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -405,58 +388,15 @@ mod tests {
         };
 
         let text_message = WebSocketMessage::Text(r#"{"type":"join","size":10}"#.to_string());
-        assert_eq!(on_message(&mut context, text_message), Status::Continue());
+        assert_eq!(
+            on_message("".to_string(), &mut context, text_message),
+            Status::Continue()
+        );
     }
 
     #[test]
     fn test_on_chunk() {
         let (sender, _) = flume::bounded(1000);
-        // let mut context = Context {
-        //     hmac: vec![],
-        //     sender: sender.clone(),
-        //     key: EphemeralSecret::random(&mut OsRng),
-        //     shared_key: Some(Aes128Gcm::new(Key::<Aes128Gcm>::from_slice(&[0u8; 16]))),
-        //     files: vec![File {
-        //         name: "file1.txt".to_string(),
-        //         size: 100,
-        //         progress: 0,
-        //         handle: fs::File::create("file1.txt").unwrap(),
-        //     }],
-        //     sequence: 0,
-        //     index: 0,
-        //     progress: 0,
-        //     length: 0,
-        // };
-
-        // let chunk_packet = ChunkPacket {
-        //     sequence: 0,
-        //     chunk: b"Hello, world!".to_vec(),
-        // };
-        // assert_eq!(on_chunk(&mut context, chunk_packet), Status::Continue());
-        // assert_eq!(context.sequence, 1);
-        // assert_eq!(context.length, 14);
-        // assert_eq!(context.progress, 14);
-
-        // let chunk_packet = ChunkPacket {
-        //     sequence: 1,
-        //     chunk: b"Hello, world!".to_vec(),
-        // };
-        // assert_eq!(
-        //     on_chunk(&mut context, chunk_packet),
-        //     Status::Err("Expected sequence 1, but got 1.".into())
-        // );
-
-        // context.files.clear();
-        // let chunk_packet = ChunkPacket {
-        //     sequence: 0,
-        //     chunk: b"Hello, world!".to_vec(),
-        // };
-        // assert_eq!(
-        //     on_chunk(&mut context, chunk_packet),
-        //     Status::Err("Invalid file index.".into())
-        // );
-
-        // Test a chunk packet with no shared key
         let mut context = Context {
             hmac: vec![],
             sender,

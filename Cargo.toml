@@ -7,4 +7,6 @@ members = [
   "caesar-mobile",
   "caesar-shuttle",
   "caesar-tui",
+  # "flutter_gui",
+  "flutter_test_lib"
 ]

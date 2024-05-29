@@ -6,7 +6,7 @@ use std::{net::SocketAddr, sync::Arc};
 
 use crate::{
     relay::{appstate::AppState, server::ws_handler},
-    sender::{client as sender, util::generate_random_name},
+    sender::client as sender,
 };
 use axum::{routing::get, Router};
 use tokio::{net::TcpListener, sync::mpsc, task};
@@ -18,15 +18,16 @@ use tower_http::trace::{DefaultMakeSpan, TraceLayer};
 use tracing::{debug, error, info};
 use uuid::Uuid;
 
-pub async fn start_sender(relay: Arc<String>, files: Arc<Vec<String>>) {
+pub async fn start_sender(name: String, relay: Arc<String>, files: Arc<Vec<String>>) {
+    debug!("Got name: {:?}", name);
     let (tx, mut rx) = mpsc::channel(1);
     debug!("Got relay: {relay}");
     let room_id = Uuid::new_v4().to_string();
-    let rand_name = generate_random_name();
+    // let rand_name = generate_random_name();
     let local_room_id = room_id.clone();
     let local_files = files.clone();
     let local_relay = relay.clone();
-    let local_rand_name = rand_name.clone();
+    let local_rand_name = name.clone();
     let local_tx = tx.clone();
     let local_ws_thread = task::spawn(async move {
         start_local_ws().await;
@@ -37,7 +38,7 @@ pub async fn start_sender(relay: Arc<String>, files: Arc<Vec<String>>) {
             files.clone(),
             Some(room_id),
             relay.clone(),
-            Arc::new(rand_name.clone()),
+            Arc::new(name.clone()),
             tx.clone(),
             false,
         )

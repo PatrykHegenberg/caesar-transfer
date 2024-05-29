@@ -1,0 +1,37 @@
+name: flutter_test_gui
+description: "A new Flutter project."
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.3.4 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  bitsdojo_window: ^0.1.6
+  cross_file: ^0.3.4+1
+  mobile_scanner: ^5.1.0
+  qr_flutter: ^4.1.0
+  flutter_dotenv: ^5.1.0
+  file_picker: ^8.0.3
+  desktop_drop: ^0.4.4
+  shared_preferences: ^2.2.3
+
+  cupertino_icons: ^1.0.6
+  rust_lib_flutter_test_gui:
+    path: rust_builder
+  flutter_rust_bridge: 2.0.0-dev.33
+  permission_handler: ^11.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^3.0.0
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
