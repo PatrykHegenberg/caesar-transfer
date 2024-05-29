@@ -6,11 +6,12 @@ import { CommonModule } from '@angular/common';
 import { FileResponse, open } from '@tauri-apps/plugin-dialog';
 import { listen } from '@tauri-apps/api/event';
 import { StorageService } from '../../services/storage.service';
+import { QRCodeModule } from 'angularx-qrcode'
 
 @Component({
   selector: 'app-sender',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, QRCodeModule],
   templateUrl: './sender.component.html',
   styleUrls: ['./sender.component.css']
 })
@@ -85,7 +86,6 @@ export class SenderComponent implements OnInit {
       this.sendingSuccess = false;
       this.tauriService.send(relay, this.files)
         .then(sendDataReturn => {
-          console.log(sendDataReturn + ' Data sent successfully');
           this.sendingSuccess = true;
           setTimeout(() => {
             this.reset();

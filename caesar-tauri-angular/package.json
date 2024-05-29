@@ -21,6 +21,7 @@
     "@tauri-apps/api": ">=2.0.0-beta.0",
     "@tauri-apps/plugin-dialog": "^2.0.0-beta.3",
     "@tauri-apps/plugin-shell": ">=2.0.0-beta.0",
+    "angularx-qrcode": "^17.0.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.2"

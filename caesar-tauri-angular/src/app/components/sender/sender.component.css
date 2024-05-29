@@ -1,12 +1,12 @@
 h2 {
     text-align: center;
-    color: #333;
+    color: #a4a3a3;
   }
   
   p {
     text-align: center;
     font-size: 1.2em;
-    color: #666;
+    color: #a4a3a3;
   }
   
   .form-group {
@@ -43,6 +43,13 @@ h2 {
   button:hover {
     background-color: #0056b3;
   }
+
+  .qrcodeImage {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+  }
+  
 
   .cancel-button {
     padding: 10px 20px;

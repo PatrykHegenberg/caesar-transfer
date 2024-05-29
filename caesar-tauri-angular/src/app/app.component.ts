@@ -16,7 +16,6 @@ import { SettingsMenuComponent } from './components/settings-menu/settings-menu.
 export class AppComponent implements OnInit {
   constructor(private tauriService: TauriService, private route: ActivatedRoute) {}
   ngOnInit() {
-    console.log("Init")
     // this.tauriService.serve(8000, 'localhost').then(message => console.log(message));
   }
 }

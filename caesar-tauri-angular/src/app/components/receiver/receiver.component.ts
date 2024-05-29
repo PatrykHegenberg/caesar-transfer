@@ -55,7 +55,6 @@ export class ReceiverComponent implements OnInit {
       this.receiveSuccess = false;
       this.tauriService.receive(relay, this.transferName)
         .then(sendDataReturn => {
-          console.log(sendDataReturn + ' Data received successfully')
           this.receiveSuccess = true;
           setTimeout(() => {
             this.reset();
