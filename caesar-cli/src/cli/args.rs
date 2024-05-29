@@ -79,7 +79,7 @@ impl Args {
                 name,
             }) => {
                 println!("Receive for {name:?}");
-                receiver::start_receiver(
+                let _ = receiver::start_receiver(
                     ".".to_string(),
                     relay.as_deref().unwrap_or(&cfg.app_origin),
                     name,

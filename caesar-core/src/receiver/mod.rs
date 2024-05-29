@@ -36,7 +36,7 @@ pub async fn start_receiver(filepath: String, relay: &str, name: &str) -> Result
     if let Err(relay_err) = start_ws_com(filepath, relay, res.relay_room_id.as_str()).await {
         debug!("Failed to connect remote: {relay_err}");
     }
-    let _success = http_client::download_success(http_url.as_str(), name)
+    http_client::download_success(http_url.as_str(), name)
         .await
         .map_err(|e| anyhow!("Failed to download success: {}", e))?;
 
