@@ -2,7 +2,6 @@ use hex;
 use rand::{seq::SliceRandom, thread_rng};
 use sha2::{Digest, Sha256};
 
-
 /// Generates a random name composed of an adjective, a noun, and another noun.
 ///
 /// # Returns
@@ -91,6 +90,26 @@ mod tests {
 
         assert!(name.contains('-'));
         assert!(name.split('-').count() == 3);
-        assert!(name.is_empty());
+        // assert!(name.is_empty());
+    }
+    #[test]
+    fn test_replace_protocol_replaces_ws_with_http() {
+        let result = replace_protocol("ws://example.com");
+        assert_eq!(result, "http://example.com");
+    }
+
+    #[test]
+    fn test_replace_protocol_replaces_wss_with_https() {
+        let result = replace_protocol("wss://example.com");
+        assert_eq!(result, "https://example.com");
+    }
+
+    #[test]
+    fn test_replace_protocol_does_not_replace_http_or_https() {
+        let result = replace_protocol("http://example.com");
+        assert_eq!(result, "http://example.com");
+
+        let result = replace_protocol("https://example.com");
+        assert_eq!(result, "https://example.com");
     }
 }
