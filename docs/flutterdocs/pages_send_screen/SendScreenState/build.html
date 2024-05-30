@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the build method from the SendScreenState class, for the Dart programming language.">
+  <title>build method - SendScreenState class - send_screen library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">flutter_test_gui</a></li>
+    <li><a href="../../pages_send_screen/pages_send_screen-library.html">pages&#47;send_screen.dart</a></li>
+    <li><a href="../../pages_send_screen/SendScreenState-class.html">SendScreenState</a></li>
+    <li class="self-crumb">build method</li>
+  </ol>
+  <div class="self-name">build</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button" title="Toggle brightness">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span id="dark-theme-button" class="material-symbols-outlined">
+        dark_mode
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        light_mode
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="pages_send_screen&#47;SendScreenState-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">build</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+  <div>
+    <ol class="annotation-list">
+        <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
+    </ol>
+  </div>
+
+<span class="returntype"><a href="https://api.flutter.dev/flutter/widgets/Widget-class.html">Widget</a></span>
+<span class="name ">build</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="build-param-context"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span></span></li>
+</ol>)
+
+      <div class="features"><span class="feature">override</span></div>
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Builds the UI for the send screen.</p>
+<p>Returns a <a href="https://api.flutter.dev/flutter/material/Scaffold-class.html">Scaffold</a> widget that contains a <a href="https://api.flutter.dev/flutter/widgets/Column-class.html">Column</a> with two children:</p>
+<ul>
+<li>A <a href="https://api.flutter.dev/flutter/widgets/Center-class.html">Center</a> widget that contains a <a href="https://api.flutter.dev/flutter/widgets/Stack-class.html">Stack</a> with a <a href="https://api.flutter.dev/flutter/widgets/GestureDetector-class.html">GestureDetector</a> that
+handles file picking and dragging.</li>
+<li>An <a href="https://api.flutter.dev/flutter/material/ElevatedButton-class.html">ElevatedButton</a> that triggers the transfer when pressed.</li>
+</ul>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    &#47;&#47; Set the background color of the scaffold.
+    backgroundColor: Constants.backColor,
+    &#47;&#47; Build the body of the scaffold.
+    body: Column(
+      &#47;&#47; Align the children vertically to the center.
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        &#47;&#47; Build the file picking and dragging UI.
+        Center(
+          child: Stack(
+            children: [
+              &#47;&#47; Build the gesture detector.
+              GestureDetector(
+                &#47;&#47; Handle file picking when the user taps.
+                onTap: openFilePicker,
+                &#47;&#47; Handle file dragging.
+                child: DropTarget(
+                  &#47;&#47; Add the selected files to the list when the user drops files.
+                  onDragDone: (detail) {
+                    setState(() {
+                      _list.addAll(detail.files);
+                    });
+                  },
+                  &#47;&#47; Show the add icon when the user drags files over the drop area.
+                  onDragEntered: (detail) {
+                    setState(() {
+                      _dragging = true;
+                    });
+                  },
+                  &#47;&#47; Hide the add icon when the user stops dragging files.
+                  onDragExited: (detail) {
+                    setState(() {
+                      _dragging = false;
+                    });
+                  },
+                  &#47;&#47; Build the drop area UI.
+                  child: Column(
+                    children: [
+                      &#47;&#47; Build the circular container for the drop area.
+                      Container(
+                        height: 200,
+                        width: 200,
+                        decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Constants.textColor),
+                        &#47;&#47; Show the add icon when the user is dragging files.
+                        child: _dragging
+                            ? const Center(
+                                child: Icon(
+                                  Icons.add_rounded,
+                                  color: Constants.highlightColor,
+                                  size: 200,
+                                ),
+                              )
+                            &#47;&#47; Show the upload icon when the user is not dragging files.
+                            : const Center(
+                                child: Icon(
+                                  Icons.upload_rounded,
+                                  color: Constants.highlightColor,
+                                  size: 200,
+                                ),
+                              ),
+                      ),
+                      &#47;&#47; Add some spacing between the drop area and the send button.
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        &#47;&#47; Build the send button.
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            &#47;&#47; Set the background color of the button.
+            backgroundColor: Constants.textColor,
+            &#47;&#47; Set the text color of the button.
+            foregroundColor: Constants.backColor,
+            &#47;&#47; Set the shape of the button.
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          &#47;&#47; Trigger the transfer when the user presses the button.
+          onPressed: () {
+            _startTransfer();
+          },
+          &#47;&#47; Set the text of the button.
+          child: const Text(&quot;Send&quot;),
+        ),
+      ],
+    ),
+  );
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">flutter_test_gui</a></li>
+    <li><a href="../../pages_send_screen/pages_send_screen-library.html">send_screen</a></li>
+    <li><a href="../../pages_send_screen/SendScreenState-class.html">SendScreenState</a></li>
+    <li class="self-crumb">build method</li>
+</ol>
+
+
+    <h5>SendScreenState class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    flutter_test_gui
+      1.0.0+1
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

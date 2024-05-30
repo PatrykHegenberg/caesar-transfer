@@ -1,0 +1,11 @@
+/home/pata/dev/learn/Rust/caesar_transfer/docs/rustdocs/release/deps/libprost_derive-0c30033df4bc7f7e.so: /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/lib.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/field/mod.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/field/group.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/field/map.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/field/message.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/field/oneof.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/field/scalar.rs
+
+/home/pata/dev/learn/Rust/caesar_transfer/docs/rustdocs/release/deps/prost_derive-0c30033df4bc7f7e.d: /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/lib.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/field/mod.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/field/group.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/field/map.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/field/message.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/field/oneof.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/field/scalar.rs
+
+/home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/lib.rs:
+/home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/field/mod.rs:
+/home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/field/group.rs:
+/home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/field/map.rs:
+/home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/field/message.rs:
+/home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/field/oneof.rs:
+/home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/prost-derive-0.12.5/src/field/scalar.rs:

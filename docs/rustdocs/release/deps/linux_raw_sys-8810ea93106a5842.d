@@ -1,0 +1,11 @@
+/home/pata/dev/learn/Rust/caesar_transfer/docs/rustdocs/release/deps/liblinux_raw_sys-8810ea93106a5842.rmeta: /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/lib.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/elf.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/x86_64/errno.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/x86_64/general.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/x86_64/ioctl.rs
+
+/home/pata/dev/learn/Rust/caesar_transfer/docs/rustdocs/release/deps/liblinux_raw_sys-8810ea93106a5842.rlib: /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/lib.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/elf.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/x86_64/errno.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/x86_64/general.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/x86_64/ioctl.rs
+
+/home/pata/dev/learn/Rust/caesar_transfer/docs/rustdocs/release/deps/linux_raw_sys-8810ea93106a5842.d: /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/lib.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/elf.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/x86_64/errno.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/x86_64/general.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/x86_64/ioctl.rs
+
+/home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/lib.rs:
+/home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/elf.rs:
+/home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/x86_64/errno.rs:
+/home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/x86_64/general.rs:
+/home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/linux-raw-sys-0.4.13/src/x86_64/ioctl.rs:

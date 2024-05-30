@@ -1,0 +1,1 @@
+window.ALL_CRATES = ["caesar","caesar_core","caesar_transfer_iu","rust_lib_flutter_test_gui"];

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["list_packet","packet"],"struct":["ChunkPacket","HandshakePacket","HandshakeResponsePacket","ListPacket","Packet","ProgressPacket"]};

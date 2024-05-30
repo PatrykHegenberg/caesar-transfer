@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["DELAY","DESTINATION","MAX_CHUNK_SIZE","NONCE_SIZE"],"fn":["on_chunk","on_create_room","on_error","on_handshake","on_handshake_finalize","on_join_room","on_leave_room","on_message","on_progress","start"],"struct":["Context","File"]};

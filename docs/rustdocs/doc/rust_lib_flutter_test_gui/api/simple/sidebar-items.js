@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["adjectives","generate_random_name","init_app","nouns1","nouns2","start_rust_receiver","start_rust_sender"]};

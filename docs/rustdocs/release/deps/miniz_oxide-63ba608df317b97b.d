@@ -1,0 +1,10 @@
+/home/pata/dev/learn/Rust/caesar_transfer/docs/rustdocs/release/deps/libminiz_oxide-63ba608df317b97b.rmeta: /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.2/src/lib.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.2/src/inflate/mod.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.2/src/inflate/core.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.2/src/inflate/output_buffer.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.2/src/inflate/stream.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.2/src/shared.rs
+
+/home/pata/dev/learn/Rust/caesar_transfer/docs/rustdocs/release/deps/miniz_oxide-63ba608df317b97b.d: /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.2/src/lib.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.2/src/inflate/mod.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.2/src/inflate/core.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.2/src/inflate/output_buffer.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.2/src/inflate/stream.rs /home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.2/src/shared.rs
+
+/home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.2/src/lib.rs:
+/home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.2/src/inflate/mod.rs:
+/home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.2/src/inflate/core.rs:
+/home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.2/src/inflate/output_buffer.rs:
+/home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.2/src/inflate/stream.rs:
+/home/pata/.cargo/registry/src/index.crates.io-6f17d22bba15001f/miniz_oxide-0.7.2/src/shared.rs:

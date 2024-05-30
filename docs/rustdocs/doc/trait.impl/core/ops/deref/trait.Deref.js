@@ -1,0 +1,4 @@
+(function() {var implementors = {
+"caesar":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.78.0/core/ops/deref/trait.Deref.html\" title=\"trait core::ops::deref::Deref\">Deref</a> for <a class=\"struct\" href=\"caesar/config/struct.GLOBAL_CONFIG.html\" title=\"struct caesar::config::GLOBAL_CONFIG\">GLOBAL_CONFIG</a>"]],
+"rust_lib_flutter_test_gui":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.78.0/core/ops/deref/trait.Deref.html\" title=\"trait core::ops::deref::Deref\">Deref</a> for <a class=\"struct\" href=\"rust_lib_flutter_test_gui/frb_generated/struct.FLUTTER_RUST_BRIDGE_HANDLER.html\" title=\"struct rust_lib_flutter_test_gui::frb_generated::FLUTTER_RUST_BRIDGE_HANDLER\">FLUTTER_RUST_BRIDGE_HANDLER</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
