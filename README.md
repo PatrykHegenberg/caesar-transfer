@@ -34,7 +34,7 @@ You can optionally specify the listening address and port using flags:
 ```bash
 ./target/release/caesar serve -p 8080 -l 192.168.1.100
 ```
-By default, the server listens on 0.0.0.0:1323.
+By default, the server listens on 0.0.0.0:8000.
 
 `send`
 Sends data through the relay server.
